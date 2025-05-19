@@ -1,11 +1,13 @@
 package com.example.frontendproyectoapp.interfaces
 
+import com.example.frontendproyectoapp.DTO.UsuarioEntradaDTO
 import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
+import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -36,6 +38,9 @@ interface UsuarioService {
 
     @POST("/api/Usuario/login")
     suspend fun login(@Body login: Login): UsuarioRespuesta
+
+    @POST("/api/Usuario/registrar")
+    fun registrarUsuario(@Body usuario: UsuarioEntradaDTO): Call<Void>  // o Call<UsuarioRespuestaDTO> si quieres usar la respuesta
 
 }
 

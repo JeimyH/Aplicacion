@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +31,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.frontendproyectoapp.viewModel.RegistroViewModel
+import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
+import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 
 @Composable
-fun RegistroVent2Screen(navController: NavController) {
+fun RegistroVent2Screen(navController: NavController, viewModel: RegistroViewModel) {
     RegistroVent2ScreenContent(
+        viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
         onContinuarClick = { navController.navigate("registro3") }
     )
@@ -43,31 +51,34 @@ fun RegistroVent2Screen(navController: NavController) {
 @Composable
 fun RegistroVent2ScreenContent(
     onBackClick: () -> Unit = {},
-    onContinuarClick: () -> Unit = {}
+    onContinuarClick: () -> Unit = {},
+    viewModel: RegistroViewModel
 ) {
     val sexos = listOf("Masculino", "Femenino", "Otro")
-    val edades = (18..100).map { it.toString() }
     val alturas = (140..220).map { "$it cm" }
     val pesos = (40..200).map { "$it kg" }
 
-    var sexo by remember { mutableStateOf("Sexo") }
-    var edad by remember { mutableStateOf("Edad") }
-    var altura by remember { mutableStateOf("Altura") }
-    var peso by remember { mutableStateOf("Peso") }
+    var sexo by remember { mutableStateOf(viewModel.sexo.ifEmpty { "Sexo" })}
+    var altura by remember { mutableStateOf(if (viewModel.altura > 0) "${viewModel.altura.toInt()} cm" else "Altura") }
+    var peso by remember { mutableStateOf(if (viewModel.peso > 0) "${viewModel.peso.toInt()} kg" else "Peso")  }
 
     var expandedSexo by remember { mutableStateOf(false) }
-    var expandedEdad by remember { mutableStateOf(false) }
-    var expandedAltura by remember { mutableStateOf(false) }
+    var expandedAltura by remember { mutableStateOf(false)}
     var expandedPeso by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    var fechaNacimiento by remember { mutableStateOf("Selecciona tu fecha de nacimiento") }
+    var fechaNacimiento by remember {  mutableStateOf(viewModel.fechaNacimiento.ifEmpty { "Selecciona tu fecha de nacimiento" }) }
 
+    // DatePickerDialog
+    val calendar = Calendar.getInstance()
     val datePickerDialog = DatePickerDialog(
         context,
-        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            fechaNacimiento = "$dayOfMonth/${month + 1}/$year"
+        { _, year, month, dayOfMonth ->
+            val selectedDate = Calendar.getInstance()
+            selectedDate.set(year, month, dayOfMonth)
+            val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            fechaNacimiento = format.format(selectedDate.time)
+            viewModel.fechaNacimiento = fechaNacimiento
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
@@ -89,54 +100,44 @@ fun RegistroVent2ScreenContent(
                 .clickable { onBackClick() }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Cuéntanos sobre ti", fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Esta información nos ayudará a conocerte\ny personalizar tu rutina")
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Text("Cuéntanos sobre ti")
 
         DropdownSelector("Sexo", sexo, sexos, expandedSexo, { expandedSexo = it }) {
             sexo = it
+            viewModel.sexo = it
             expandedSexo = false
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        DropdownSelector("Edad", edad, edades, expandedEdad, { expandedEdad = it }) {
-            edad = it
-            expandedEdad = false
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 📅 Selector de fecha
         OutlinedTextField(
             value = fechaNacimiento,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Fecha de nacimiento") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { datePickerDialog.show() }
+            label = { Text("Fecha de Nacimiento") },
+            trailingIcon = {
+                IconButton(onClick = { datePickerDialog.show() }) {
+                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
         DropdownSelector("Altura", altura, alturas, expandedAltura, { expandedAltura = it }) {
             altura = it
+            viewModel.altura = it.replace(" cm", "").toFloat()
             expandedAltura = false
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         DropdownSelector("Peso", peso, pesos, expandedPeso, { expandedPeso = it }) {
             peso = it
+            viewModel.peso = it.replace(" kg", "").toFloat()
             expandedPeso = false
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(onClick = onContinuarClick) {
+        Button(
+            onClick = {
+                onContinuarClick()
+            }
+        ) {
             Text("Continuar")
         }
     }
@@ -182,6 +183,6 @@ fun DropdownSelector(
 
 @Preview(showBackground = true)
 @Composable
-fun RegistroVent2ScreenPreview() {
-    RegistroVent2ScreenContent()
+fun RegistroVent2ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
+    RegistroVent2ScreenContent(viewModel = viewModel)
 }

@@ -10,23 +10,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.frontendproyectoapp.viewModel.RegistroViewModel
 
 @Composable
-fun RegistroVent4Screen(navController: NavController) {
+fun RegistroVent4Screen(navController: NavController, viewModel: RegistroViewModel) {
     RegistroVent4ScreenContent(
+        viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
         onClick = { navController.navigate("registro5") }
     )
@@ -34,9 +41,9 @@ fun RegistroVent4Screen(navController: NavController) {
 
 @Composable
 fun RegistroVent4ScreenContent(
+    viewModel: RegistroViewModel,
     onClick: () -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onDietaSeleccionada: (String) -> Unit = {}
+    onBackClick: () -> Unit = {}
 ) {
     val opcionesDieta = listOf(
         "Recomendada",
@@ -46,6 +53,8 @@ fun RegistroVent4ScreenContent(
         "Baja en grasas"
     )
 
+    var seleccionDieta by remember { mutableStateOf("") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,16 +63,12 @@ fun RegistroVent4ScreenContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Flecha de regreso
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Atrás"
-                )
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
             }
         }
 
@@ -72,23 +77,33 @@ fun RegistroVent4ScreenContent(
         Text(
             text = "¿Qué tipo de dieta prefieres?",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(vertical = 16.dp),
             textAlign = TextAlign.Center
         )
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         opcionesDieta.forEach { tipoDieta ->
             OutlinedButton(
-                onClick = { onDietaSeleccionada(tipoDieta) },
+                onClick = {
+                    seleccionDieta = tipoDieta
+                    viewModel.restriccionesDieta = tipoDieta
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 6.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = if (tipoDieta == seleccionDieta) Color(0xFFB3E5FC) else Color.Transparent
+                )
             ) {
                 Text(text = tipoDieta)
             }
         }
-        Spacer(modifier = Modifier.height(80.dp))
+
+        Spacer(modifier = Modifier.height(40.dp))
+
         Button(
-            onClick = onClick
+            onClick = onClick,
+            enabled = seleccionDieta.isNotEmpty()
         ) {
             Text("Continuar")
         }
@@ -97,8 +112,8 @@ fun RegistroVent4ScreenContent(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun RegistroVent4ScreenPreview() {
+fun RegistroVent4ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
     MaterialTheme {
-        RegistroVent4ScreenContent()
+        RegistroVent4ScreenContent(viewModel = viewModel)
     }
 }

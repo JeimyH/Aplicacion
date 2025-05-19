@@ -4,8 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,105 +24,98 @@ import androidx.navigation.NavController
 import androidx.compose.material3.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.frontendproyectoapp.viewModel.RegistroViewModel
 
 @Composable
-fun RegistroVent3Screen(navController: NavController) {
+fun RegistroVent3Screen(navController: NavController, viewModel: RegistroViewModel) {
     RegistroVent3ScreenContent(
+        viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
-        onClick = { navController.navigate("registro4")
-        }
+        onClick = { navController.navigate("registro4") }
     )
 }
 
 @Composable
 fun RegistroVent3ScreenContent(
+    viewModel: RegistroViewModel,
     onClick: () -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onContinuarClick: () -> Unit = {}
+    onBackClick: () -> Unit = {}
 ) {
-    var unidad by remember { mutableStateOf("Kg / lbs") }
-    var pesoObjetivo by remember { mutableStateOf(43f) }
-    var expanded by remember { mutableStateOf(false) }
+    var pesoObjetivo by remember { mutableStateOf(viewModel.peso.toInt()) }
+    val (pesoMin, pesoMax) = calcularRangoPesoNormal(viewModel.altura)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier
-                .align(Alignment.Start)
-                .clickable { onBackClick() }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Peso Objetivo", fontWeight = FontWeight.Bold)
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Dropdown de unidad
-        Box {
-            OutlinedTextField(
-                value = unidad,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Unidad") },
-                trailingIcon = {
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { expanded = !expanded }
-                    )
-                }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                DropdownMenuItem(text = { Text("Kg") }, onClick = {
-                    unidad = "Kg"
-                    expanded = false
-                })
-                DropdownMenuItem(text = { Text("lbs") }, onClick = {
-                    unidad = "lbs"
-                    expanded = false
-                })
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Según la escala de IMC, tu rango de peso normal está entre ( ) - ( ) kg")
+        Text(
+            text = "Establece tu peso objetivo",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = pesoObjetivo.toInt().toString(),
-            onValueChange = {
-                pesoObjetivo = it.toFloatOrNull() ?: pesoObjetivo
-            },
-            label = { Text("Peso") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        Text(
+            text = "Según tu altura, tu peso saludable está entre $pesoMin kg y $pesoMax kg",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(onClick = onClick) {
+        OutlinedTextField(
+            value = pesoObjetivo.toString(),
+            onValueChange = {
+                pesoObjetivo = it.toIntOrNull() ?: pesoObjetivo
+            },
+            label = { Text("Peso objetivo (kg)") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Button(
+            onClick = {
+                viewModel.pesoObjetivo = pesoObjetivo.toFloat()
+                onClick()
+            },
+            enabled = pesoObjetivo in 30..300
+        ) {
             Text("Continuar")
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun RegistroVent3ScreenPreview() {
-    RegistroVent3ScreenContent()
+fun RegistroVent3ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
+    RegistroVent3ScreenContent(viewModel = viewModel)
+}
+
+fun calcularRangoPesoNormal(alturaCm: Float): Pair<Int, Int> {
+    val alturaM = alturaCm / 100f
+    val pesoMin = 18.5 * (alturaM * alturaM)
+    val pesoMax = 24.9 * (alturaM * alturaM)
+    return Pair(pesoMin.toInt(), pesoMax.toInt())
 }

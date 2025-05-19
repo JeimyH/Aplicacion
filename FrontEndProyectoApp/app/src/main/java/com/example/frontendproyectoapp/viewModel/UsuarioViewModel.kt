@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.frontendproyectoapp.DTO.UsuarioEntradaDTO
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.repository.UsuarioRepository
 import kotlinx.coroutines.Dispatchers
@@ -72,5 +73,9 @@ class UsuarioViewModel : ViewModel(){
             objetivosSalud = objetivosSalud
         )
         guardarUsuario(usuario)
+    }
+
+    fun registrarUsuario(usuario: UsuarioEntradaDTO, onResult: (Boolean) -> Unit) {
+        repositoryUsuario.registrarUsuario(usuario, onResult)
     }
 }

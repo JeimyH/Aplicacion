@@ -9,5 +9,6 @@ data class UsuarioRespuesta(
     val peso: Float,
     val sexo: String?,
     val restriccionesDieta: String?,
-    val objetivosSalud: String?
+    val objetivosSalud: String?,
+    val pesoObjetivo: Float = 0f
 )
