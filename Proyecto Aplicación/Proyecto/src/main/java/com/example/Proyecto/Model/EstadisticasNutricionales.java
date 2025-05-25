@@ -19,59 +19,60 @@ import java.time.LocalDate;
 public class EstadisticasNutricionales {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_estadistica;
+    @Column(name = "id_estadistica")
+    private Long idEstadistica;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "Fecha", nullable = false)
     private LocalDate fecha;
 
     @Column(name = "Total_Calorias", nullable = false)
-    private float totalCalorias;
+    private Float totalCalorias;
 
     @Column(name = "Total_Proteinas")
-    private float totalProteinas;
+    private Float totalProteinas;
 
     @Column(name = "Total_Carbohidratos")
-    private float totalCarbohidratos;
+    private Float totalCarbohidratos;
 
     @Column(name = "Total_Grasas")
-    private float totalGrasas;
+    private Float totalGrasas;
 
     @Column(name = "Total_Azucares")
-    private float totalAzucares;
+    private Float totalAzucares;
 
     @Column(name = "Total_Fibra")
-    private float totalFibra;
+    private Float totalFibra;
 
     @Column(name = "Total_Sodio")
-    private float totalSodio;
+    private Float totalSodio;
 
     @Column(name = "Total_Grasas_Saturadas")
-    private float totalGrasasSaturadas;
+    private Float totalGrasasSaturadas;
 
     @Column(name = "Total_Agua")
-    private float totalAgua;
+    private Float totalAgua;
 
     @Column(name = "Total_Comidas")
     private int totalComidas;
 
     @Column(name = "IMC", nullable = false)
-    private float imc;
+    private Float imc;
 
     //@Column(name = "Objetivos_Cumplidos")
     //private String objetivosCumplidos;
 
     @Column(name = "Calorias_Desayuno")
-    private float caloriasDesayuno;
+    private Float caloriasDesayuno;
 
     @Column(name = "Calorias_Almuerzo")
-    private float caloriasAlmuerzo;
+    private Float caloriasAlmuerzo;
 
     @Column(name = "Calorias_Cena")
-    private float caloriasCena;
+    private Float caloriasCena;
 
     @Column(name = "Calorias_Snack")
-    private float caloriasSnack;
+    private Float caloriasSnack;
 
     //Relaciones
 

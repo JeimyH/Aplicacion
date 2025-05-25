@@ -16,7 +16,8 @@ import lombok.Setter;
 public class ComidaRutinaIA {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_comida;
+    @Column(name = "id_comida")
+    private Long idComida;
 
     @Column(name = "Tipo_Comida", nullable = false)
     @Enumerated(EnumType.STRING)

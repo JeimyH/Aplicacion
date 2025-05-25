@@ -1,13 +1,15 @@
 package com.example.Proyecto.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor
@@ -18,16 +20,17 @@ import java.sql.Timestamp;
 public class RegistroAgua {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_registroAgua;
+    @Column(name = "id_registro_agua")
+    private Long idRegistroAgua;
 
     @Column(name = "Cantidadml", nullable = false)
-    private float cantidadml;
+    private int cantidadml;
 
-    @Column(name = "Registrado_En", nullable = false)
-    private Timestamp registradoEn;
+    @Column(name = "Fecha", nullable = false)
+    private LocalDate fecha;
 
     @ManyToOne
     @JoinColumn(name="id_usuario", nullable = false)
-    @JsonIgnore
+    //@JsonIgnore
     private Usuario usuario;
 }

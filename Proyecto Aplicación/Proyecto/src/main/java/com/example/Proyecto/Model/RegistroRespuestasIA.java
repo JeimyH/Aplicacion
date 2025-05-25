@@ -18,7 +18,8 @@ import java.sql.Timestamp;
 public class RegistroRespuestasIA {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_respuesta;
+    @Column(name = "id_respuesta")
+    private Long idRespuesta;
 
     @Column(name = "Datos_Respuesta", nullable = false, length = 100)
     private String datosRespuesta;

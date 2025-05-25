@@ -150,8 +150,11 @@ public class UsuarioService {
         usuario.setAltura(entradaDTO.getAltura());
         usuario.setPeso(entradaDTO.getPeso());
         usuario.setSexo(entradaDTO.getSexo());
+        usuario.setRestriccionesDieta(entradaDTO.getRestriccionesDieta());
+        usuario.setObjetivosSalud(entradaDTO.getObjetivosSalud());
+        usuario.setPesoObjetivo(entradaDTO.getPesoObjetivo());
         usuario.setCreadoEn(new Timestamp(System.currentTimeMillis()));
-        usuario.setActualizadoEn(new Timestamp(System.currentTimeMillis()));
+        //usuario.setActualizadoEn(new Timestamp(System.currentTimeMillis()));
 
         return usuarioRepository.save(usuario);
     }

@@ -1,8 +1,11 @@
 package com.example.frontendproyectoapp.interfaces
 
 import com.example.frontendproyectoapp.model.RegistroAgua
+import com.example.frontendproyectoapp.model.RegistroAguaEntrada
+import com.example.frontendproyectoapp.model.RegistroAguaRespuesta
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -19,15 +22,25 @@ interface RegistroAguaService {
     @GET("/api/RegistroAgua/buscar/{id_registroAgua}")
     suspend fun listarPorIdRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long): RegistroAgua
 
-    @POST("/api/RegistroAgua/guardar")
-    suspend fun guardarRegistroAgua(@Body registroAgua: RegistroAgua): RegistroAgua
+    @POST("/api/agua/registrar/{idUsuario}")
+    suspend fun registrarAgua(@Path("idUsuario") idUsuario: Long): Response<Void>
 
-    @DELETE("/api/RegistroAgua/eliminar/{id_registroAgua}")
-    suspend fun eliminarRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long)
+    @DELETE("/api/agua/eliminar/{idUsuario}")
+    suspend fun eliminarAgua(@Path("idUsuario") idUsuario: Long): Response<Void>
 
     @PUT("/api/RegistroAgua/actualizar/{id_registroAgua}")
-    suspend fun actualizarRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long, @Body registroAgua: RegistroAgua): RegistroAgua
+    suspend fun actualizarRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long, @Body registro: RegistroAgua): RegistroAgua
 
+    @POST("/api/RegistroAgua/{idUsuario}")
+    suspend fun registrarAgua(
+        @Path("idUsuario") idUsuario: Long,
+        @Body registro: RegistroAguaEntrada
+    ): Response<RegistroAguaRespuesta>
+
+    @GET("/api/RegistroAgua/{idUsuario}/hoy")
+    suspend fun obtenerRegistroHoy(
+        @Path("idUsuario") idUsuario: Long
+    ): Response<RegistroAguaRespuesta?>
 }
 
 object RetrofitClientRegistroAgua {

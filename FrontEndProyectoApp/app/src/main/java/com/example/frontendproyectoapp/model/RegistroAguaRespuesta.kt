@@ -1,8 +1,8 @@
 package com.example.frontendproyectoapp.model
 
-data class RegistroAgua(
-    val idRegistro: Long? = null,
+data class RegistroAguaRespuesta (
+    val idRegistro: Long,
     val idUsuario: Long,
     val fecha: String,
-    val cantidadMl: Int
+    val cantidadml: Int
 )

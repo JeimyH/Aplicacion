@@ -104,6 +104,7 @@ public class RegistroAlimentoService {
             registroAlimentoExistente.setUnidadMedida(registroAlimentoActualizado.getUnidadMedida());
             registroAlimentoExistente.setTamanoPorcion(registroAlimentoActualizado.getTamanoPorcion());
             registroAlimentoExistente.setMomentoDelDia(registroAlimentoActualizado.getMomentoDelDia());
+            registroAlimentoExistente.setFavorito(registroAlimentoActualizado.isFavorito());
             return registroAlimentoRepository.save(registroAlimentoExistente);
         }else{
             return null;

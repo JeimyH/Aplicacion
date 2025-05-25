@@ -1,12 +1,15 @@
 package com.example.Proyecto.Service;
 
 import com.example.Proyecto.Model.RegistroAgua;
+import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.RegistroAguaRepository;
+import com.example.Proyecto.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -15,6 +18,9 @@ import java.util.Optional;
 public class RegistroAguaService {
     @Autowired
     public RegistroAguaRepository registroAguaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     public List<RegistroAgua> listarRegistrosAgua(){
         // Validacion para intentar obtener la lista de Registros de Agua
@@ -31,22 +37,22 @@ public class RegistroAguaService {
         }
     }
 
-    public Optional<RegistroAgua> listarPorIdRegistroAgua(long id_registroAgua){
+    public Optional<RegistroAgua> listarPorIdRegistroAgua(long idRegistroAgua){
         try {
-            Optional<RegistroAgua> registroAgua = registroAguaRepository.findById(id_registroAgua);
+            Optional<RegistroAgua> registroAgua = registroAguaRepository.findById(idRegistroAgua);
             if (registroAgua.isPresent()) {
                 return registroAgua;
             } else {
                 throw new IllegalStateException("No se encontraron Registros de Agua.");
             }
         }catch (Exception e){
-            throw new RuntimeException("Error al listar el Registro de Agua " + id_registroAgua +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al listar el Registro de Agua " + idRegistroAgua +": "+ e.getMessage(), e);
         }
     }
 
     public RegistroAgua guardarRegistroAgua(RegistroAgua registroAgua){
         // Inicializa el campo creadoEn
-        registroAgua.setRegistradoEn(new Timestamp(System.currentTimeMillis()));
+        //registroAgua.setRegistradoEn(new Timestamp(System.currentTimeMillis()));
         try{
             if(registroAgua==null){
                 throw new IllegalArgumentException("El Registro de Agua no puede ser nulo");
@@ -54,9 +60,12 @@ public class RegistroAguaService {
             }else{
                 if (registroAgua.getCantidadml() == 0) {
                     throw new IllegalArgumentException("La cantidad en ml del Registro de Agua es obligatorio.");
-                }else if(registroAgua.getRegistradoEn() == null){
+                }
+                /*else if(registroAgua.getRegistradoEn() == null){
                     throw new IllegalArgumentException("El timestamp del registrado en del Registro de Agua es obligatorio.");
                 }
+
+                 */
                 return  registroAguaRepository.save(registroAgua);
             }
         }catch (Exception e){
@@ -64,41 +73,52 @@ public class RegistroAguaService {
         }
     }
 
-    public void eliminarRegistroAgua(long id_registroAgua){
+    public void eliminarRegistroAgua(long idRegistroAgua){
         try {
-            if (id_registroAgua<=0) {
+            if (idRegistroAgua<=0) {
                 throw new IllegalArgumentException("El ID del Registro de Agua debe ser un número positivo.");
             }
-            if (!registroAguaRepository.existsById(id_registroAgua)) {
-                throw new NoSuchElementException("No se encontró un Registro de Agua con el ID: " + id_registroAgua);
+            if (!registroAguaRepository.existsById(idRegistroAgua)) {
+                throw new NoSuchElementException("No se encontró un Registro de Agua con el ID: " + idRegistroAgua);
             }
-            registroAguaRepository.deleteById(id_registroAgua);
+            registroAguaRepository.deleteById(idRegistroAgua);
         }catch (Exception e){
-            throw new RuntimeException("Error al eliminar el Registro de Agua "+ id_registroAgua +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al eliminar el Registro de Agua "+ idRegistroAgua +": "+ e.getMessage(), e);
         }
     }
 
-    public RegistroAgua actualizarRegistroAgua(long id_registroAgua, RegistroAgua registroAguaActualizado){
-        Optional<RegistroAgua> registroAguaOpt = registroAguaRepository.findById(id_registroAgua);
+    public RegistroAgua actualizarRegistroAgua(long idRegistroAgua, RegistroAgua registroAguaActualizado){
+        Optional<RegistroAgua> registroAguaOpt = registroAguaRepository.findById(idRegistroAgua);
         if(registroAguaOpt.isPresent()){
             RegistroAgua registroAguaExistente = registroAguaOpt.get();
             registroAguaExistente.setCantidadml(registroAguaActualizado.getCantidadml());
-            registroAguaExistente.setRegistradoEn(new Timestamp(System.currentTimeMillis()));
+            //registroAguaExistente.setRegistradoEn(new Timestamp(System.currentTimeMillis()));
             return registroAguaRepository.save(registroAguaExistente);
         }else{
             return null;
         }
     }
 
-    public void obtenerCantidadAgua(@Param("id_usuario") Integer id_usuario, @Param("Cantidadml") Float cantidad, @Param("registradoEn") String registradaEn){
-        registroAguaRepository.registrarCantidadAgua(id_usuario,cantidad,registradaEn);
+    public RegistroAgua registrarAgua(Long idUsuario, int cantidadml) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        LocalDate hoy = LocalDate.now();
+
+        RegistroAgua registro = registroAguaRepository.findByUsuario_IdUsuarioAndFecha(idUsuario, hoy)
+                .orElse(new RegistroAgua());
+
+        registro.setUsuario(usuario);
+        registro.setFecha(hoy);
+        registro.setCantidadml(cantidadml);
+
+        return registroAguaRepository.save(registro);
     }
 
-    public List<RegistroAgua> HistorialPorFecha(@Param("id_usuario") Integer id_usuario, @Param("fecha") String fecha){
-        return registroAguaRepository.obtenerHistorialPorFecha(id_usuario,fecha);
+    public RegistroAgua obtenerRegistroDeHoy(Long idUsuario) {
+        return registroAguaRepository
+                .findByUsuario_IdUsuarioAndFecha(idUsuario, LocalDate.now())
+                .orElse(null);
     }
 
-    public Float TotalConsumidoPorDia(@Param("id_usuario") Integer id_usuario, @Param("fecha") String fecha){
-        return registroAguaRepository.obtenerTotalConsumidoPorDia(id_usuario,fecha);
-    }
 }

@@ -16,7 +16,8 @@ import lombok.Setter;
 public class UnidadEquivalencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_unidad;
+    @Column(name = "id_unidad")
+    private Long idUnidad;
 
     @Column(name = "Unidad_Origen", length = 50, nullable = false)
     private String unidadOrigen;

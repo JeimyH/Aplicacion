@@ -82,7 +82,7 @@ fun RegistroUsuarioScreen(viewModel: UsuarioViewModel = viewModel()) {
     }
 
     val usuariosFiltrados = usuarios.filter {
-        it.id_usuario?.toString()?.contains(idBusqueda, ignoreCase = true) ?: false
+        it.idUsuario?.toString()?.contains(idBusqueda, ignoreCase = true) ?: false
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
@@ -195,7 +195,7 @@ fun RegistroUsuarioScreen(viewModel: UsuarioViewModel = viewModel()) {
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("ID: ${usuario.id_usuario}", style = MaterialTheme.typography.titleMedium)
+                            Text("ID: ${usuario.idUsuario}", style = MaterialTheme.typography.titleMedium)
                             Text("Nombre: ${usuario.nombre}")
                             Text("Correo: ${usuario.correo}")
                             Text("Contraseña: ${usuario.contrasena}")
@@ -229,7 +229,7 @@ fun RegistroUsuarioScreen(viewModel: UsuarioViewModel = viewModel()) {
             confirmButton = {
                 TextButton(onClick = {
                     usuarioAEliminar?.let {
-                        viewModel.eliminarUsuario(it.id_usuario)
+                        viewModel.eliminarUsuario(it.idUsuario)
                         Toast.makeText(context, "Usuario eliminado", Toast.LENGTH_SHORT).show()
                         viewModel.obtenerUsuarios()
                     }

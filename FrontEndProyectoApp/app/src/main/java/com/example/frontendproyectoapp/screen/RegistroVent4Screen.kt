@@ -28,10 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.frontendproyectoapp.viewModel.RegistroViewModel
+import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 @Composable
-fun RegistroVent4Screen(navController: NavController, viewModel: RegistroViewModel) {
+fun RegistroVent4Screen(navController: NavController, viewModel: UsuarioViewModel) {
     RegistroVent4ScreenContent(
         viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
@@ -41,7 +41,7 @@ fun RegistroVent4Screen(navController: NavController, viewModel: RegistroViewMod
 
 @Composable
 fun RegistroVent4ScreenContent(
-    viewModel: RegistroViewModel,
+    viewModel: UsuarioViewModel,
     onClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
@@ -112,7 +112,7 @@ fun RegistroVent4ScreenContent(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun RegistroVent4ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
+fun RegistroVent4ScreenPreview(viewModel: UsuarioViewModel = viewModel()) {
     MaterialTheme {
         RegistroVent4ScreenContent(viewModel = viewModel)
     }

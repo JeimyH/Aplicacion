@@ -18,13 +18,17 @@ import java.sql.Timestamp;
 public class RegistroAlimento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_registroAlimento;
+    @Column(name = "id_registro_alimento")
+    private Long idRegistroAlimento;
 
     @Column(name = "Tamano_Porcion", nullable = false)
-    private float tamanoPorcion;  // cantidad consumida del alimento
+    private Float tamanoPorcion;  // cantidad consumida del alimento
 
     @Column(name = "Unidad_Medida", length = 50, nullable = false)
     private String unidadMedida;  // taza, gramos, porcion
+
+    @Column(name = "Favorito")
+    private boolean favorito;
 
     @Column(name = "Momento_Del_Dia", length = 50) // Nuevo campo
     private String momentoDelDia;

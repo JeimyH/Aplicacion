@@ -31,16 +31,16 @@ public class ConfiguracionAplicacionService {
         }
     }
 
-    public Optional<ConfiguracionAplicacion> listarPorIdConfiguracionAplicacion(long id_configuracion){
+    public Optional<ConfiguracionAplicacion> listarPorIdConfiguracionAplicacion(long idConfiguracion){
         try {
-            Optional<ConfiguracionAplicacion> configuracionAplicacion = configuracionAplicacionRepository.findById(id_configuracion);
+            Optional<ConfiguracionAplicacion> configuracionAplicacion = configuracionAplicacionRepository.findById(idConfiguracion);
             if (configuracionAplicacion.isPresent()) {
                 return configuracionAplicacion;
             } else {
                 throw new IllegalStateException("No se encontraron configuraciones.");
             }
         }catch (Exception e){
-            throw new RuntimeException("Error al listar la Configuracion de la Aplicacion " + id_configuracion +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al listar la Configuracion de la Aplicacion " + idConfiguracion +": "+ e.getMessage(), e);
         }
     }
 
@@ -58,22 +58,22 @@ public class ConfiguracionAplicacionService {
         }
     }
 
-    public void eliminarConfiguracionAplicacion(long id_configuracion){
+    public void eliminarConfiguracionAplicacion(long idConfiguracion){
         try {
-            if (id_configuracion<=0) {
+            if (idConfiguracion<=0) {
                 throw new IllegalArgumentException("El ID de la configuracion debe ser un número positivo.");
             }
-            if (!configuracionAplicacionRepository.existsById(id_configuracion)) {
-                throw new NoSuchElementException("No se encontró una configuracion con el ID: " + id_configuracion);
+            if (!configuracionAplicacionRepository.existsById(idConfiguracion)) {
+                throw new NoSuchElementException("No se encontró una configuracion con el ID: " + idConfiguracion);
             }
-            configuracionAplicacionRepository.deleteById(id_configuracion);
+            configuracionAplicacionRepository.deleteById(idConfiguracion);
         }catch (Exception e){
-            throw new RuntimeException("Error al eliminar la configuracion "+ id_configuracion +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al eliminar la configuracion "+ idConfiguracion +": "+ e.getMessage(), e);
         }
     }
 
-    public ConfiguracionAplicacion actualizarConfiguracionAplicacion(long id_configuracion, ConfiguracionAplicacion configuracionAplicacionActualizado){
-        Optional<ConfiguracionAplicacion> configuracionAplicacionOpt = configuracionAplicacionRepository.findById(id_configuracion);
+    public ConfiguracionAplicacion actualizarConfiguracionAplicacion(long idConfiguracion, ConfiguracionAplicacion configuracionAplicacionActualizado){
+        Optional<ConfiguracionAplicacion> configuracionAplicacionOpt = configuracionAplicacionRepository.findById(idConfiguracion);
         if(configuracionAplicacionOpt.isPresent()){
             ConfiguracionAplicacion configuracionAplicacionExistente = configuracionAplicacionOpt.get();
             configuracionAplicacionExistente.setIdioma(configuracionAplicacionActualizado.getIdioma());
@@ -87,15 +87,15 @@ public class ConfiguracionAplicacionService {
         }
     }
 
-    public List<ConfiguracionAplicacion> obtenerConfiguracionesDeUsuario(@Param("id_usuario") Integer id_usuario){
-        return configuracionAplicacionRepository.obtenerConfiguracionesDelUsuario(id_usuario);
+    public List<ConfiguracionAplicacion> obtenerConfiguracionesDeUsuario(@Param("idUsuario") Long idUsuario){
+        return configuracionAplicacionRepository.obtenerConfiguracionesDelUsuario(idUsuario);
     }
 
-    public void actualizarIdiomaOUnidades(@Param("id_usuario") Integer id_usuario, @Param("idioma") String idioma, @Param("unidades") String unidades){
-        configuracionAplicacionRepository.actualizarIdiomaOUnidades(id_usuario,idioma,unidades);
+    public void actualizarIdiomaOUnidades(@Param("idUsuario") Long idUsuario, @Param("idioma") String idioma, @Param("unidades") String unidades){
+        configuracionAplicacionRepository.actualizarIdiomaOUnidades(idUsuario,idioma,unidades);
     }
 
-    public void activarDesactivarNotificacion(@Param("id_usuario") Integer id_usuario, @Param("activadas") boolean activadas){
-        configuracionAplicacionRepository.activarDesactivarNotificaciones(id_usuario,activadas);
+    public void activarDesactivarNotificacion(@Param("idUsuario") Long idUsuario, @Param("activadas") boolean activadas){
+        configuracionAplicacionRepository.activarDesactivarNotificaciones(idUsuario,activadas);
     }
 }

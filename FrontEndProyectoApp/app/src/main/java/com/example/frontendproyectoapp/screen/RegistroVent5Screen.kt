@@ -1,6 +1,5 @@
 package com.example.frontendproyectoapp.screen
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,12 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -120,68 +113,6 @@ fun RegistroVent5ScreenContent(
             onClick = onClick
         ) {
             Text("Continuar")
-        }
-    }
-}
-
-@Composable
-fun CaloriasGraph(caloriasMin: Int, caloriasMax: Int) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Canvas(modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)) {
-            val width = size.width
-            val height = size.height
-
-            val start = Offset(x = width * 0.2f, y = height * 0.8f)
-            val end = Offset(x = width * 0.8f, y = height * 0.8f)
-            val peak = Offset(x = width * 0.5f, y = height * 0.2f)
-
-            val path = Path().apply {
-                moveTo(start.x, start.y)
-                quadraticBezierTo(peak.x, peak.y, end.x, end.y)
-            }
-
-            drawPath(
-                path = path,
-                color = Color.Black,
-                style = Stroke(width = 4f, cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
-
-            // Línea vertical en inicio (mínimo)
-            drawLine(
-                color = Color.Black,
-                start = Offset(start.x, start.y),
-                end = Offset(start.x, start.y - 20),
-                strokeWidth = 4f
-            )
-
-            // Línea vertical en final (máximo)
-            drawLine(
-                color = Color.Black,
-                start = Offset(end.x, end.y),
-                end = Offset(end.x, end.y - 20),
-                strokeWidth = 4f
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Mínimo", fontWeight = FontWeight.Medium)
-                Text("$caloriasMin kcal", fontSize = 14.sp)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Máximo", fontWeight = FontWeight.Medium)
-                Text("$caloriasMax kcal", fontSize = 14.sp)
-            }
         }
     }
 }

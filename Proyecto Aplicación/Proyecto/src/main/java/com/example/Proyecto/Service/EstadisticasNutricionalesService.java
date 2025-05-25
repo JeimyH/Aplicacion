@@ -30,16 +30,16 @@ public class EstadisticasNutricionalesService {
         }
     }
 
-    public Optional<EstadisticasNutricionales> listarPorIdEstadisticasNutricionales(long id_estadistica){
+    public Optional<EstadisticasNutricionales> listarPorIdEstadisticasNutricionales(long idEstadistica){
         try {
-            Optional<EstadisticasNutricionales> estadisticasNutricionales = estadisticasNutricionalesRepository.findById(id_estadistica);
+            Optional<EstadisticasNutricionales> estadisticasNutricionales = estadisticasNutricionalesRepository.findById(idEstadistica);
             if (estadisticasNutricionales.isPresent()) {
                 return estadisticasNutricionales;
             } else {
                 throw new IllegalStateException("No se encontraron Estadisticas Nutricionales.");
             }
         }catch (Exception e){
-            throw new RuntimeException("Error al listar la Estadistica Nutricional " + id_estadistica +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al listar la Estadistica Nutricional " + idEstadistica +": "+ e.getMessage(), e);
         }
     }
 
@@ -63,22 +63,22 @@ public class EstadisticasNutricionalesService {
         }
     }
 
-    public void eliminarEstadisticasNutricionales(long id_estadistica){
+    public void eliminarEstadisticasNutricionales(long idEstadistica){
         try {
-            if (id_estadistica<=0) {
+            if (idEstadistica<=0) {
                 throw new IllegalArgumentException("El ID de la Estadistica Nutricional debe ser un número positivo.");
             }
-            if (!estadisticasNutricionalesRepository.existsById(id_estadistica)) {
-                throw new NoSuchElementException("No se encontró una Estadistica Nutricional con el ID: " + id_estadistica);
+            if (!estadisticasNutricionalesRepository.existsById(idEstadistica)) {
+                throw new NoSuchElementException("No se encontró una Estadistica Nutricional con el ID: " + idEstadistica);
             }
-            estadisticasNutricionalesRepository.deleteById(id_estadistica);
+            estadisticasNutricionalesRepository.deleteById(idEstadistica);
         }catch (Exception e){
-            throw new RuntimeException("Error al eliminar la Estadistica Nutricional "+ id_estadistica +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al eliminar la Estadistica Nutricional "+ idEstadistica +": "+ e.getMessage(), e);
         }
     }
 
-    public EstadisticasNutricionales actualizarEstadisticasNutricionales(long id_estadistica, EstadisticasNutricionales estadisticaActualizado){
-        Optional<EstadisticasNutricionales> estadisticasOpt = estadisticasNutricionalesRepository.findById(id_estadistica);
+    public EstadisticasNutricionales actualizarEstadisticasNutricionales(long idEstadistica, EstadisticasNutricionales estadisticaActualizado){
+        Optional<EstadisticasNutricionales> estadisticasOpt = estadisticasNutricionalesRepository.findById(idEstadistica);
         if(estadisticasOpt.isPresent()){
             EstadisticasNutricionales estadisticaExistente = estadisticasOpt.get();
             estadisticaExistente.setFecha(estadisticaActualizado.getFecha());
@@ -102,20 +102,20 @@ public class EstadisticasNutricionalesService {
         }
     }
 
-    public EstadisticasNutricionales obtenerEstadisticasDiarias(@Param("id_usuario") Integer id_usuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.calcularEstadisticasDiarias(id_usuario,fecha);
+    public EstadisticasNutricionales obtenerEstadisticasDiarias(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
+        return estadisticasNutricionalesRepository.calcularEstadisticasDiarias(idUsuario,fecha);
     }
 
-    public List<EstadisticasNutricionales> obtenerProgresosSemanales(@Param("id_usuario") Integer id_usuario,@Param("fechaInicio") String fechaInicio,@Param("fechaFin") String fechaFin){
-        return estadisticasNutricionalesRepository.obtenerProgresoSemanal(id_usuario,fechaInicio,fechaFin);
+    public List<EstadisticasNutricionales> obtenerProgresosSemanales(@Param("idUsuario") Long idUsuario,@Param("fechaInicio") String fechaInicio,@Param("fechaFin") String fechaFin){
+        return estadisticasNutricionalesRepository.obtenerProgresoSemanal(idUsuario,fechaInicio,fechaFin);
     }
 
-    public Float obtenerIMC(@Param("id_usuario") Integer id_usuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.calcularIMC(id_usuario,fecha);
+    public Float obtenerIMC(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
+        return estadisticasNutricionalesRepository.calcularIMC(idUsuario,fecha);
     }
 
-    public Integer totalComidasRegistradas(@Param("id_usuario") Integer id_usuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.obtenerTotalComidasRegistradas(id_usuario,fecha);
+    public Integer totalComidasRegistradas(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
+        return estadisticasNutricionalesRepository.obtenerTotalComidasRegistradas(idUsuario,fecha);
     }
 
 }

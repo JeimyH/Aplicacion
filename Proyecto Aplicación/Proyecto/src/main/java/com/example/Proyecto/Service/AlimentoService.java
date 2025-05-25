@@ -30,16 +30,16 @@ public class AlimentoService {
         }
     }
 
-    public Optional<Alimento> listarPorIdAlimento(long id_alimento){
+    public Optional<Alimento> listarPorIdAlimento(long idAlimento){
         try {
-            Optional<Alimento> alimento = alimentoRepository.findById(id_alimento);
+            Optional<Alimento> alimento = alimentoRepository.findById(idAlimento);
             if (alimento.isPresent()) {
                 return alimento;
             } else {
                 throw new IllegalStateException("No se encontraron alimentos.");
             }
         }catch (Exception e){
-            throw new RuntimeException("Error al listar el alimento " + id_alimento +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al listar el alimento " + idAlimento +": "+ e.getMessage(), e);
         }
     }
 
@@ -81,22 +81,22 @@ public class AlimentoService {
         }
     }
 
-    public void eliminarAlimento(long id_alimento){
+    public void eliminarAlimento(long idAlimento){
         try {
-            if (id_alimento<=0) {
+            if (idAlimento<=0) {
                 throw new IllegalArgumentException("El ID del alimento debe ser un número positivo.");
             }
-            if (!alimentoRepository.existsById(id_alimento)) {
-                throw new NoSuchElementException("No se encontró un alimento con el ID: " + id_alimento);
+            if (!alimentoRepository.existsById(idAlimento)) {
+                throw new NoSuchElementException("No se encontró un alimento con el ID: " + idAlimento);
             }
-            alimentoRepository.deleteById(id_alimento);
+            alimentoRepository.deleteById(idAlimento);
         }catch (Exception e){
-            throw new RuntimeException("Error al eliminar el alimento "+ id_alimento +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al eliminar el alimento "+ idAlimento +": "+ e.getMessage(), e);
         }
     }
 
-    public Alimento actualizarAlimento(long id_alimento, Alimento alimentoActualizado){
-        Optional<Alimento> alimentoOpt = alimentoRepository.findById(id_alimento);
+    public Alimento actualizarAlimento(long idAlimento, Alimento alimentoActualizado){
+        Optional<Alimento> alimentoOpt = alimentoRepository.findById(idAlimento);
         if(alimentoOpt.isPresent()){
             Alimento alimentoExistente = alimentoOpt.get();
             alimentoExistente.setNombreAlimento(alimentoActualizado.getNombreAlimento());
@@ -112,7 +112,6 @@ public class AlimentoService {
             alimentoExistente.setUrlImagen(alimentoActualizado.getUrlImagen());
             alimentoExistente.setCantidadBase(alimentoActualizado.getCantidadBase());
             alimentoExistente.setUnidadBase(alimentoActualizado.getUnidadBase());
-            // alimentoExistente.setFavorito(alimentoActualizado.isFavorito());
             return alimentoRepository.save(alimentoExistente);
         }else{
             return null;
@@ -123,12 +122,12 @@ public class AlimentoService {
         return alimentoRepository.filtrarAlimentosPorCategoria(categoria);
     }
 
-    public List<Alimento> obtenerAlimentosPorUsuario(@Param("id_usuario") Long id_usuario){
-        return alimentoRepository.consultarAlimentosPorUsuario(id_usuario);
+    public List<Alimento> obtenerAlimentosPorUsuario(@Param("idUsuario") Long idUsuario){
+        return alimentoRepository.consultarAlimentosPorUsuario(idUsuario);
     }
 
-    public Alimento obtenerInfNutricional(@Param("id_alimento") Long id_alimento){
-        return alimentoRepository.obtenerInformacionNutricional(id_alimento);
+    public Alimento obtenerInfNutricional(@Param("idAlimento") Long idAlimento){
+        return alimentoRepository.obtenerInformacionNutricional(idAlimento);
     }
 
     public Alimento obtenerAlimentoPorNombre(String nombre) {

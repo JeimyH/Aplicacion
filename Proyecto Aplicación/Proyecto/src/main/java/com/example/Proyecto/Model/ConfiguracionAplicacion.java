@@ -18,7 +18,8 @@ import java.time.LocalDate;
 public class ConfiguracionAplicacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_configuracion;
+    @Column(name = "id_configuracion")
+    private Long idConfiguracion;
 
     @Column(name = "Idioma")
     @Enumerated(EnumType.STRING) // Guarda el nombre del enum (más legible)

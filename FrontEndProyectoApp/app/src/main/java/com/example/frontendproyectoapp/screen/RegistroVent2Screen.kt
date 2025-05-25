@@ -1,23 +1,16 @@
 package com.example.frontendproyectoapp.screen
 
 import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -28,19 +21,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.frontendproyectoapp.viewModel.RegistroViewModel
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.*
 
 @Composable
-fun RegistroVent2Screen(navController: NavController, viewModel: RegistroViewModel) {
+fun RegistroVent2Screen(navController: NavController, viewModel: UsuarioViewModel) {
     RegistroVent2ScreenContent(
         viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
@@ -52,7 +42,7 @@ fun RegistroVent2Screen(navController: NavController, viewModel: RegistroViewMod
 fun RegistroVent2ScreenContent(
     onBackClick: () -> Unit = {},
     onContinuarClick: () -> Unit = {},
-    viewModel: RegistroViewModel
+    viewModel: UsuarioViewModel
 ) {
     val sexos = listOf("Masculino", "Femenino", "Otro")
     val alturas = (140..220).map { "$it cm" }
@@ -143,46 +133,8 @@ fun RegistroVent2ScreenContent(
     }
 }
 
-@Composable
-fun DropdownSelector(
-    label: String,
-    selected: String,
-    options: List<String>,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onItemSelected: (String) -> Unit
-) {
-    Box {
-        OutlinedTextField(
-            value = selected,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = {
-                Icon(
-                    Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    modifier = Modifier.clickable { onExpandedChange(!expanded) }
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = { onItemSelected(option) }
-                )
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
-fun RegistroVent2ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
+fun RegistroVent2ScreenPreview(viewModel: UsuarioViewModel = viewModel()) {
     RegistroVent2ScreenContent(viewModel = viewModel)
 }

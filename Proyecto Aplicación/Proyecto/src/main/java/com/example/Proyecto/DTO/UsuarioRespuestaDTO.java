@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @Getter
 public class UsuarioRespuestaDTO {
-    private Long id_usuario;
+    private Long idUsuario;
     private String correo;
     private String nombre;
     private LocalDate fechaNacimiento;
@@ -23,9 +23,10 @@ public class UsuarioRespuestaDTO {
     private String sexo;
     private String restriccionesDieta;
     private String objetivosSalud;
+    private Float pesoObjetivo;
 
     public UsuarioRespuestaDTO(Usuario usuario) {
-        this.id_usuario = usuario.getId_usuario();
+        this.idUsuario = usuario.getIdUsuario();
         this.correo = usuario.getCorreo();
         this.nombre = usuario.getNombre();
         this.fechaNacimiento = usuario.getFechaNacimiento();
@@ -34,5 +35,6 @@ public class UsuarioRespuestaDTO {
         this.sexo = usuario.getSexo();
         this.restriccionesDieta = usuario.getRestriccionesDieta();
         this.objetivosSalud = usuario.getObjetivosSalud();
+        this.pesoObjetivo = usuario.getPesoObjetivo();
     }
 }

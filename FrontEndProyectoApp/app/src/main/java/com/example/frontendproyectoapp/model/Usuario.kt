@@ -1,7 +1,7 @@
 package com.example.frontendproyectoapp.model
 
 data class Usuario (
-    val id_usuario: Long = 0,
+    val idUsuario: Long = 0,
     val correo: String = "",
     val contrasena: String = "",
     val nombre: String = "",

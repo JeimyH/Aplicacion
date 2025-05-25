@@ -13,17 +13,17 @@ import java.util.List;
 public interface ConfiguracionAplicacionRepository extends JpaRepository<ConfiguracionAplicacion, Long> {
     // Obtener configuraciones del usuario
     @Query(value = "SELECT * FROM ConfiguracionAplicacion WHERE idUsuario = :idUsuario", nativeQuery = true)
-    List<ConfiguracionAplicacion> obtenerConfiguracionesDelUsuario(@Param("idUsuario") Integer idUsuario);
+    List<ConfiguracionAplicacion> obtenerConfiguracionesDelUsuario(@Param("idUsuario") Long idUsuario);
 
     // Actualizar idioma o unidades
     @Modifying
     @Query(value = "UPDATE ConfiguracionAplicacion SET idioma = :idioma, unidades = :unidades WHERE idUsuario = :idUsuario", nativeQuery = true)
-    void actualizarIdiomaOUnidades(@Param("idUsuario") Integer idUsuario,
+    void actualizarIdiomaOUnidades(@Param("idUsuario") Long idUsuario,
                                    @Param("idioma") String idioma,
                                    @Param("unidades") String unidades);
 
     // Activar/desactivar notificaciones
     @Modifying
     @Query(value = "UPDATE ConfiguracionAplicacion SET notificacionesActivadas = :activadas WHERE idUsuario = :idUsuario", nativeQuery = true)
-    void activarDesactivarNotificaciones(@Param("idUsuario") Integer idUsuario, @Param("activadas") boolean activadas);
+    void activarDesactivarNotificaciones(@Param("idUsuario") Long idUsuario, @Param("activadas") boolean activadas);
 }

@@ -27,10 +27,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.frontendproyectoapp.viewModel.RegistroViewModel
+import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 @Composable
-fun RegistroVent3Screen(navController: NavController, viewModel: RegistroViewModel) {
+fun RegistroVent3Screen(navController: NavController, viewModel: UsuarioViewModel) {
     RegistroVent3ScreenContent(
         viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
@@ -40,7 +40,7 @@ fun RegistroVent3Screen(navController: NavController, viewModel: RegistroViewMod
 
 @Composable
 fun RegistroVent3ScreenContent(
-    viewModel: RegistroViewModel,
+    viewModel: UsuarioViewModel,
     onClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
@@ -109,7 +109,7 @@ fun RegistroVent3ScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-fun RegistroVent3ScreenPreview(viewModel: RegistroViewModel = viewModel()) {
+fun RegistroVent3ScreenPreview(viewModel: UsuarioViewModel = viewModel()) {
     RegistroVent3ScreenContent(viewModel = viewModel)
 }
 

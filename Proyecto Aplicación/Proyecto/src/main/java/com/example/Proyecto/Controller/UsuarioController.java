@@ -31,10 +31,10 @@ public class UsuarioController {
         return new ResponseEntity<>(usuarios, HttpStatus.OK); // 200 OK
     }
 
-    @GetMapping("/buscar/{id_usuario}")
-    public ResponseEntity<Usuario> listarPorIdUsuario(@PathVariable long id_usuario){
+    @GetMapping("/buscar/{idUsuario}")
+    public ResponseEntity<Usuario> listarPorIdUsuario(@PathVariable long idUsuario){
         try {
-            Optional<Usuario> usuarioOpt = usuarioService.listarPorIdUsuario(id_usuario);
+            Optional<Usuario> usuarioOpt = usuarioService.listarPorIdUsuario(idUsuario);
             return usuarioOpt.map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
         } catch (IllegalArgumentException e) {
@@ -52,10 +52,10 @@ public class UsuarioController {
         }
     }
 
-    @DeleteMapping("/eliminar/{id_usuario}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable long id_usuario){
+    @DeleteMapping("/eliminar/{idUsuario}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable long idUsuario){
         try {
-            usuarioService.eliminarUsuario(id_usuario);
+            usuarioService.eliminarUsuario(idUsuario);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
@@ -64,10 +64,10 @@ public class UsuarioController {
         }
     }
 
-    @PutMapping("/actualizar/{id_usuario}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable long id_usuario, @RequestBody Usuario usuarioActualizado){
+    @PutMapping("/actualizar/{idUsuario}")
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable long idUsuario, @RequestBody Usuario usuarioActualizado){
         try {
-            Usuario usuario = usuarioService.actualizarUsuario(id_usuario, usuarioActualizado);
+            Usuario usuario = usuarioService.actualizarUsuario(idUsuario, usuarioActualizado);
             return new ResponseEntity<>(usuario, HttpStatus.OK); // 200 OK
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
@@ -78,7 +78,7 @@ public class UsuarioController {
 
     private UsuarioRespuestaDTO mapToResponse(Usuario usuario) {
         UsuarioRespuestaDTO respuesta = new UsuarioRespuestaDTO();
-        respuesta.setId_usuario(usuario.getId_usuario());
+        respuesta.setIdUsuario(usuario.getIdUsuario());
         respuesta.setCorreo(usuario.getCorreo());
         respuesta.setNombre(usuario.getNombre());
         respuesta.setFechaNacimiento(usuario.getFechaNacimiento());
@@ -103,6 +103,7 @@ public class UsuarioController {
         }
     }
 
+    /*
     @PostMapping("/login")
     public ResponseEntity<UsuarioRespuestaDTO> login(@RequestBody LoginDTO loginDTO) {
         try {
@@ -115,4 +116,24 @@ public class UsuarioController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+     */
+
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioRespuestaDTO> login(@RequestBody LoginDTO loginDTO) {
+        try {
+            Usuario usuario = usuarioService.autenticar(loginDTO.getCorreo(), loginDTO.getContrasena());
+
+            if (usuario == null) {
+                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            }
+
+            UsuarioRespuestaDTO response = new UsuarioRespuestaDTO(usuario);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // <-- Esto es clave para ver el error real
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

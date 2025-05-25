@@ -22,17 +22,17 @@ public interface ComidaRutinaIARepository extends JpaRepository<ComidaRutinaIA, 
     // Actualizar valores nutricionales de comida
     @Modifying
     @Query(value = "UPDATE ComidaRutinaIA SET valoresNutricionales = :valoresNutricionales WHERE idComida = :idComida", nativeQuery = true)
-    void actualizarValoresNutricionales(@Param("idComida") Integer idComida, @Param("valoresNutricionales") String valoresNutricionales);
+    void actualizarValoresNutricionales(@Param("idComida") Long idComida, @Param("valoresNutricionales") String valoresNutricionales);
 
     // Agregar alimento a una comida en rutina
     @Modifying
     @Query(value = "INSERT INTO ComidaRutinaIA_Alimento (idComida, idAlimento, cantidad) VALUES (:idComida, :idAlimento, :cantidad)", nativeQuery = true)
-    void agregarAlimentoAComida(@Param("idComida") Integer idComida, @Param("idAlimento") Integer idAlimento, @Param("cantidad") Float cantidad);
+    void agregarAlimentoAComida(@Param("idComida") Long idComida, @Param("idAlimento") Long idAlimento, @Param("cantidad") Float cantidad);
 
     // Eliminar alimento de una comida en rutina
     @Modifying
     @Query(value = "DELETE FROM ComidaRutinaIA_Alimento WHERE idComida = :idComida AND idAlimento = :idAlimento", nativeQuery = true)
-    void eliminarAlimentoDeComida(@Param("idComida") Integer idComida, @Param("idAlimento") Integer idAlimento);
+    void eliminarAlimentoDeComida(@Param("idComida") Long idComida, @Param("idAlimento") Long idAlimento);
 
 
 

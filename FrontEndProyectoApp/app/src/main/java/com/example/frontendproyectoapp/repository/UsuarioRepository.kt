@@ -1,12 +1,13 @@
 package com.example.frontendproyectoapp.repository
 
-import com.example.frontendproyectoapp.DTO.UsuarioEntradaDTO
 import com.example.frontendproyectoapp.interfaces.RetrofitClientUsuario
 import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class UsuarioRepository {
     suspend fun obtenerUsuarios(): List<Usuario> {
@@ -29,14 +30,32 @@ class UsuarioRepository {
         return RetrofitClientUsuario.usuarioService.actualizarUsuario(id_usuario, usuario)
     }
 
+    /*
     suspend fun loginUsuario(login: Login): UsuarioRespuesta{
-        return RetrofitClientUsuario.usuarioService.login(login)
+            return RetrofitClientUsuario.usuarioService.login(login)
+    }
+     */
+    suspend fun login(correo: String, contrasena: String): Result<UsuarioRespuesta> {
+        return try {
+            val response = RetrofitClientUsuario.usuarioService.login(Login(correo, contrasena))
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.success(it)
+                } ?: Result.failure(Exception("Respuesta vacía"))
+            } else if (response.code() == 401) {
+                Result.failure(Exception("Correo o contraseña incorrectos"))
+            } else {
+                Result.failure(Exception("Error inesperado: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun registrarUsuario(usuario: UsuarioEntradaDTO, onResult: (Boolean) -> Unit) {
+    fun registrarUsuario(usuario: UsuarioEntrada, onResult: (Boolean) -> Unit) {
         val call = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
-        call.enqueue(object : retrofit2.Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 onResult(response.isSuccessful)
             }
 

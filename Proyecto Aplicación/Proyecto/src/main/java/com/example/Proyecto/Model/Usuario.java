@@ -22,7 +22,8 @@ import java.util.List;
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_usuario;
+    @Column(name = "id_usuario")
+    private Long idUsuario;
 
     @Column(name = "Correo", nullable = false, length = 100)
     private String correo;
@@ -38,10 +39,10 @@ public class Usuario {
     private LocalDate fechaNacimiento;
 
     @Column(name = "Altura", nullable = false)
-    private float altura;
+    private Float altura;
 
     @Column(name = "Peso", nullable = false)
-    private float peso;
+    private Float peso;
 
     @Column(name = "Sexo", nullable = false, length = 25)
     private String sexo;
@@ -51,6 +52,9 @@ public class Usuario {
 
     @Column(name = "Objetivos_Salud")
     private String objetivosSalud;
+
+    @Column(name = "Peso_Objetivo")
+    private Float pesoObjetivo;
 
     @Column(name = "Creado_En", nullable = false)
     private Timestamp creadoEn;

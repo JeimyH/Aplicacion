@@ -19,7 +19,8 @@ import java.util.List;
 public class SesionChatbot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_sesion;
+    @Column(name = "id_sesion")
+    private Long idSesion;
 
     @Column(name = "Inicio_Sesion", nullable = false)
     private Timestamp inicioSesion;

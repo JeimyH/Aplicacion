@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.frontendproyectoapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -66,10 +66,16 @@ dependencies {
     // navigation
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.androidx.datastore.preferences)
+
+// Icons extended (importante para usar Icons.Filled.Restaurant)
+    implementation(libs.material.icons.extended)
+
     // Lifecycle and viewModel
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.mediation.test.suite)
 
     // Testing
     testImplementation(libs.junit)

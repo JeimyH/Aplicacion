@@ -11,5 +11,8 @@ data class Alimento (
     val fibra: Float,
     val sodio: Float,
     val grasasSaturadas: Float,
-    val categoria: String
+    val categoria: String,
+    val urlImagen: String,
+    val cantidadBase: Float,
+    val unidadBase: String
 )

@@ -18,7 +18,8 @@ import java.sql.Timestamp;
 public class TokenSesion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_token;
+    @Column(name = "id_token")
+    private Long idToken;
 
     @Column(name = "Token", nullable = false)
     private String token;

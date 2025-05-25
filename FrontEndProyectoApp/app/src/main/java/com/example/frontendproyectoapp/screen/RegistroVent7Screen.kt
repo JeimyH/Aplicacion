@@ -86,43 +86,6 @@ fun RegistroVent7ScreenContent(
     }
 }
 
-@Composable
-fun GrupoAlimentos(titulo: String, alimentos: List<String>) {
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val filas = alimentos.chunked(3)
-        for (fila in filas) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                fila.forEach { alimento ->
-                    AlimentoItem(nombre = alimento)
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-fun AlimentoItem(nombre: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = Icons.Default.Favorite, // Reemplázalo por íconos personalizados
-            contentDescription = nombre,
-            modifier = Modifier.size(32.dp)
-        )
-        Text(text = nombre, fontSize = 12.sp)
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun RegistroVent7ScreenPreview() {

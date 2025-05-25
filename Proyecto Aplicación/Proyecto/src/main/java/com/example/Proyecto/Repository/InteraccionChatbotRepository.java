@@ -14,22 +14,22 @@ public interface InteraccionChatbotRepository extends JpaRepository<InteraccionC
     // Registrar interacción del chatbot
     @Modifying
     @Query(value = "INSERT INTO InteraccionChatbot (idSesion, mensajeUsuario, respuestaChatbot, tipoConsulta, fechaRegistro) VALUES (:idSesion, :mensajeUsuario, :respuestaChatbot, :tipoConsulta, CURRENT_TIMESTAMP)", nativeQuery = true)
-    void registrarInteraccion(@Param("idSesion") Integer idSesion,
+    void registrarInteraccion(@Param("idSesion") Long idSesion,
                               @Param("mensajeUsuario") String mensajeUsuario,
                               @Param("respuestaChatbot") String respuestaChatbot,
                               @Param("tipoConsulta") String tipoConsulta);
 
     // Obtener historial de interacciones
     @Query(value = "SELECT * FROM InteraccionChatbot WHERE idSesion = :idSesion ORDER BY fechaRegistro DESC", nativeQuery = true)
-    List<InteraccionChatbot> obtenerHistorialInteracciones(@Param("idSesion") Integer idSesion);
+    List<InteraccionChatbot> obtenerHistorialInteracciones(@Param("idSesion") Long idSesion);
 
     // Consultar respuesta según tipo de consulta
     @Query(value = "SELECT respuestaChatbot FROM InteraccionChatbot WHERE idSesion = :idSesion AND tipoConsulta = :tipoConsulta ORDER BY fechaRegistro DESC LIMIT 1", nativeQuery = true)
-    String consultarRespuestaPorTipo(@Param("idSesion") Integer idSesion, @Param("tipoConsulta") String tipoConsulta);
+    String consultarRespuestaPorTipo(@Param("idSesion") Long idSesion, @Param("tipoConsulta") String tipoConsulta);
 
     // Filtrar por fecha y tipo de respuesta
     @Query(value = "SELECT * FROM InteraccionChatbot WHERE idSesion = :idSesion AND fechaRegistro BETWEEN :fechaInicio AND :fechaFin AND tipoConsulta = :tipoConsulta", nativeQuery = true)
-    List<InteraccionChatbot> filtrarPorFechaYTipo(@Param("idSesion") Integer idSesion,
+    List<InteraccionChatbot> filtrarPorFechaYTipo(@Param("idSesion") Long idSesion,
                                                   @Param("fechaInicio") String fechaInicio,
                                                   @Param("fechaFin") String fechaFin,
                                                   @Param("tipoConsulta") String tipoConsulta);

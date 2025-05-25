@@ -21,4 +21,5 @@ public class UsuarioEntradaDTO {
     private String sexo;
     private String restriccionesDieta;
     private String objetivosSalud;
+    private Float pesoObjetivo;
 }

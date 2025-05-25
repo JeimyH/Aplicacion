@@ -18,7 +18,8 @@ import java.sql.Timestamp;
 public class ModificacionRutinaChatbot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_modificacion;
+    @Column(name = "id_modificacion")
+    private Long idModificacion;
 
     @Column(name = "Fecha", nullable = false)
     private Timestamp fecha;

@@ -31,16 +31,16 @@ public class ComidaRutinaIAService {
         }
     }
 
-    public Optional<ComidaRutinaIA> listarPorIdComidaRutinaIA(long id_comida){
+    public Optional<ComidaRutinaIA> listarPorIdComidaRutinaIA(long idComida){
         try {
-            Optional<ComidaRutinaIA> comidaRutinaIA = comidaRutinaIARepository.findById(id_comida);
+            Optional<ComidaRutinaIA> comidaRutinaIA = comidaRutinaIARepository.findById(idComida);
             if (comidaRutinaIA.isPresent()) {
                 return comidaRutinaIA;
             } else {
                 throw new IllegalStateException("No se encontraron comidas.");
             }
         }catch (Exception e){
-            throw new RuntimeException("Error al listar la comida " + id_comida +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al listar la comida " + idComida +": "+ e.getMessage(), e);
         }
     }
 
@@ -63,22 +63,22 @@ public class ComidaRutinaIAService {
         }
     }
 
-    public void eliminarComidaRutinaIA(long id_comida){
+    public void eliminarComidaRutinaIA(long idComida){
         try {
-            if (id_comida<=0) {
+            if (idComida<=0) {
                 throw new IllegalArgumentException("El ID de la comida debe ser un número positivo.");
             }
-            if (!comidaRutinaIARepository.existsById(id_comida)) {
-                throw new NoSuchElementException("No se encontró una comida con el ID: " + id_comida);
+            if (!comidaRutinaIARepository.existsById(idComida)) {
+                throw new NoSuchElementException("No se encontró una comida con el ID: " + idComida);
             }
-            comidaRutinaIARepository.deleteById(id_comida);
+            comidaRutinaIARepository.deleteById(idComida);
         }catch (Exception e){
-            throw new RuntimeException("Error al eliminar la comida "+ id_comida +": "+ e.getMessage(), e);
+            throw new RuntimeException("Error al eliminar la comida "+ idComida +": "+ e.getMessage(), e);
         }
     }
 
-    public ComidaRutinaIA actualizarComidaRutinaIA(long id_comida, ComidaRutinaIA comidaRutinaIAActualizado){
-        Optional<ComidaRutinaIA> comidaRutinaIAOpt = comidaRutinaIARepository.findById(id_comida);
+    public ComidaRutinaIA actualizarComidaRutinaIA(long idComida, ComidaRutinaIA comidaRutinaIAActualizado){
+        Optional<ComidaRutinaIA> comidaRutinaIAOpt = comidaRutinaIARepository.findById(idComida);
         if(comidaRutinaIAOpt.isPresent()){
             ComidaRutinaIA comidaRutinaIAExistente = comidaRutinaIAOpt.get();
             comidaRutinaIAExistente.setTipoComida(comidaRutinaIAActualizado.getTipoComida());
@@ -97,15 +97,15 @@ public class ComidaRutinaIAService {
         return comidaRutinaIARepository.obtenerAlimentosSugeridos(tipoComida,fecha);
     }
 
-    public void obtenerValoresNutricionales(@Param("id_comida") Integer id_comida, @Param("valoresNutricionales") String valoresNutricionales){
-        comidaRutinaIARepository.actualizarValoresNutricionales(id_comida,valoresNutricionales);
+    public void obtenerValoresNutricionales(@Param("idComida") Long idComida, @Param("valoresNutricionales") String valoresNutricionales){
+        comidaRutinaIARepository.actualizarValoresNutricionales(idComida,valoresNutricionales);
     }
 
-    public void obtenerAlimentoAComida(@Param("id_comida") Integer id_comida, @Param("id_alimento") Integer id_alimento, @Param("cantidad") Float cantidad){
-        comidaRutinaIARepository.agregarAlimentoAComida(id_comida,id_alimento,cantidad);
+    public void obtenerAlimentoAComida(@Param("idComida") Long idComida, @Param("idAlimento") Long idAlimento, @Param("cantidad") Float cantidad){
+        comidaRutinaIARepository.agregarAlimentoAComida(idComida,idAlimento,cantidad);
     }
 
-    public void eliminarAlimentoDeComidas(@Param("id_comida") Integer id_comida, @Param("id_alimento") Integer id_alimento){
-        comidaRutinaIARepository.eliminarAlimentoDeComida(id_comida,id_alimento);
+    public void eliminarAlimentoDeComidas(@Param("idComida") Long idComida, @Param("idAlimento") Long idAlimento){
+        comidaRutinaIARepository.eliminarAlimentoDeComida(idComida,idAlimento);
     }
 }

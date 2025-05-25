@@ -16,11 +16,11 @@ public interface AlimentoRepository extends JpaRepository<Alimento, Long> {
 
     // Consultar alimentos creados por usuario
     @Query(value = "SELECT * FROM Alimento WHERE creador = :id_usuario", nativeQuery = true)
-    List<Alimento> consultarAlimentosPorUsuario(@Param("id_usuario") Long id_usuario);
+    List<Alimento> consultarAlimentosPorUsuario(@Param("id_usuario") Long idUsuario);
 
     // Obtener información nutricional de un alimento
     @Query(value = "SELECT * FROM Alimento WHERE id_alimento = :id_alimento", nativeQuery = true)
-    Alimento obtenerInformacionNutricional(@Param("id_alimento") Long id_alimento);
+    Alimento obtenerInformacionNutricional(@Param("id_alimento") Long idAlimento);
 
     // Metodo para verificar si un alimento existe por su nombre usando una consulta nativa
     @Query(value = "SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END FROM Alimento a WHERE a.nombre_alimento = :nombreAlimento", nativeQuery = true)

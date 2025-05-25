@@ -18,34 +18,35 @@ import java.util.List;
 public class Alimento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_alimento;
+    @Column(name = "id_alimento")
+    private Long idAlimento;
 
     @Column(name = "Nombre_Alimento", nullable = false, length = 100)
     private String nombreAlimento;
 
     @Column(name = "Calorias", nullable = false)
-    private float calorias;
+    private Float calorias;
 
     @Column(name = "Proteinas", nullable = false)
-    private float proteinas;
+    private Float proteinas;
 
     @Column(name = "Carbohidratos", nullable = false)
-    private float carbohidratos;
+    private Float carbohidratos;
 
     @Column(name = "Grasas", nullable = false)
-    private float grasas;
+    private Float grasas;
 
     @Column(name = "Azucares", nullable = false)
-    private float azucares;
+    private Float azucares;
 
     @Column(name = "Fibra", nullable = false)
-    private float fibra;
+    private Float fibra;
 
     @Column(name = "Sodio", nullable = false)
-    private float sodio;
+    private Float sodio;
 
     @Column(name = "Grasas_Saturadas", nullable = false)
-    private float grasasSaturadas;
+    private Float grasasSaturadas;
 
     @Column(name = "Categoria", length = 50)
     private String categoria;
@@ -54,13 +55,10 @@ public class Alimento {
     private String urlImagen;
 
     @Column(name = "Cantidad_Base", nullable = false)
-    private float cantidadBase;  // cuantos gramos equivale el consumo de este alimento
+    private Float cantidadBase;  // cuantos gramos equivale el consumo de este alimento
 
     @Column(name = "Unidad_Base", length =50, nullable = false)
     private String unidadBase;  // gramos
-
-    @Column(name = "Favorito")
-    private boolean favorito;
 
     //Relaciones
 

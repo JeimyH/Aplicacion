@@ -7,8 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.example.frontendproyectoapp.navigation.AppNavigation
-import com.example.frontendproyectoapp.screen.RegistroUsuarioScreen
-import com.example.frontendproyectoapp.viewModel.RegistroViewModel
+import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,12 +16,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             // RegistroUsuarioScreen()
 
-            // Crear un solo viewModel compartido para todo el flujo de registro
-            val registroViewModel = remember { RegistroViewModel() }
+            // Crear un solo viewModel compartido paratodo el flujo de registro
+            val usuarioViewModel = remember { UsuarioViewModel() }
             val navController = rememberNavController()
             AppNavigation(
                 navController = navController,
-                viewModel = registroViewModel
+                viewModel = usuarioViewModel
             )
 
 

@@ -18,10 +18,11 @@ import java.util.List;
 public class PreferenciasUsuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_preferencia;
+    @Column(name = "id_preferencia")
+    private Long idPreferencia;
 
     @Column(name = "Objetivo_Agua_Diario")
-    private float objetivoAguaDiario;
+    private Float objetivoAguaDiario;
 
     @Column(name = "Comidas_Preferidas")
     private String comidasPreferidas;

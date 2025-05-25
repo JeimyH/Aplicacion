@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun RegistroVent1Screen(navController: NavController) {
     RegistroVent1ScreenContent(
         onClick = { navController.navigate("registro2") },
-        onLoginClick = { /* navController.navigate("login") */ }
+        onLoginClick = { navController.navigate("login") }
     )
 }
 

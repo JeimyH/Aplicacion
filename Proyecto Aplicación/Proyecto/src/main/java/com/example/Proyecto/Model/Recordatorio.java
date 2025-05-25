@@ -18,7 +18,8 @@ import java.sql.Time;
 public class Recordatorio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id_recordatorio;
+    @Column(name = "id_recordatorio")
+    private Long idRecordatorio;
 
     @Column(name = "Origen")
     @Enumerated(EnumType.STRING)

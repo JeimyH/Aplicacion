@@ -18,6 +18,10 @@ runtimeLivedata = "1.7.8"
 navigationCompose = "2.7.7"
 navigationComposeJvmstubs = "2.9.0"
 foundationLayoutAndroid = "1.7.2"
+materialIconsExtended = "1.6.7"
+
+datastore-preferences = "1.1.0"
+mediationTestSuite = "3.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +51,9 @@ androidx-navigation-compose-jvmstubs = { group = "androidx.navigation", name = "
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
+mediation-test-suite = { group = "com.google.android.ads", name = "mediation-test-suite", version.ref = "mediationTestSuite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,7 +1,7 @@
 package com.example.frontendproyectoapp.model
 
 data class UsuarioRespuesta(
-    val id_usuario: Long,
+    val idUsuario: Long,
     val correo: String,
     val nombre: String,
     val fechaNacimiento: String,
@@ -10,5 +10,5 @@ data class UsuarioRespuesta(
     val sexo: String?,
     val restriccionesDieta: String?,
     val objetivosSalud: String?,
-    val pesoObjetivo: Float = 0f
+    val pesoObjetivo: Float
 )

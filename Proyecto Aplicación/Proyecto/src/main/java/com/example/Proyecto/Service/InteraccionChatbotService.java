@@ -93,19 +93,19 @@ public class InteraccionChatbotService {
         }
     }
 
-    public void obtenerInteraccion(@Param("id_sesion") Integer id_sesion, @Param("mensajeUsuario") String mensajeUsuario, @Param("respuestaChatbot") String respuestaChatbot, @Param("tipoConsulta") String tipoConsulta){
+    public void obtenerInteraccion(@Param("id_sesion") Long id_sesion, @Param("mensajeUsuario") String mensajeUsuario, @Param("respuestaChatbot") String respuestaChatbot, @Param("tipoConsulta") String tipoConsulta){
         interaccionChatbotRepository.registrarInteraccion(id_sesion,mensajeUsuario,respuestaChatbot,tipoConsulta);
     }
 
-    public List<InteraccionChatbot> HistorialInteracciones(@Param("id_sesion") Integer id_sesion){
+    public List<InteraccionChatbot> HistorialInteracciones(@Param("id_sesion") Long id_sesion){
         return interaccionChatbotRepository.obtenerHistorialInteracciones(id_sesion);
     }
 
-    public String obtenerRespuestaPorTipo(@Param("id_sesion") Integer id_sesion, @Param("tipoConsulta") String tipoConsulta){
+    public String obtenerRespuestaPorTipo(@Param("id_sesion") Long id_sesion, @Param("tipoConsulta") String tipoConsulta){
         return interaccionChatbotRepository.consultarRespuestaPorTipo(id_sesion,tipoConsulta);
     }
 
-    public List<InteraccionChatbot> obtenerPorFechaYTipo(@Param("id_sesion") Integer id_sesion,@Param("fechaInicio") String fechaInicio,@Param("fechaFin") String fechaFin,@Param("tipoConsulta") String tipoConsulta){
+    public List<InteraccionChatbot> obtenerPorFechaYTipo(@Param("id_sesion") Long id_sesion,@Param("fechaInicio") String fechaInicio,@Param("fechaFin") String fechaFin,@Param("tipoConsulta") String tipoConsulta){
         return interaccionChatbotRepository.filtrarPorFechaYTipo(id_sesion,fechaInicio,fechaFin,tipoConsulta);
     }
 }
