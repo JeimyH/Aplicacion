@@ -1,6 +1,8 @@
 package com.example.frontendproyectoapp.interfaces
 
 import com.example.frontendproyectoapp.model.RegistroAlimento
+import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
+import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -13,21 +15,11 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface RegistroAlimentoService {
-    @GET("/api/RegistroAlimento/listar")
-    suspend fun listarRegistroAlimento(): List<RegistroAlimento>
+    @POST("/api/RegistroAlimento/registro")
+    suspend fun guardarRegistro(@Body registro: RegistroAlimentoEntrada)
 
-    @GET("/api/RegistroAlimento/buscar/{id_registroAlimento}")
-    suspend fun listarPorIdRegistroAlimento(@Path("id_registroAlimento") id_registroAlimento: Long): RegistroAlimento
-
-    @POST("/api/RegistroAlimento/guardar")
-    suspend fun guardarRegistroAlimento(@Body registroAlimento: RegistroAlimento): RegistroAlimento
-
-    @DELETE("/api/RegistroAlimento/eliminar/{id_registroAlimento}")
-    suspend fun eliminarRegistroAlimento(@Path("id_registroAlimento") id_registroAlimento: Long)
-
-    @PUT("/api/RegistroAlimento/actualizar/{id_registroAlimento}")
-    suspend fun actualizarRegistroAlimento(@Path("id_registroAlimento") id_registroAlimento: Long, @Body registroAlimento: RegistroAlimento): RegistroAlimento
-
+    @GET("/api/RegistroAlimento/recientes/{idUsuario}")
+    suspend fun obtenerComidasRecientes(@Path("idUsuario") idUsuario: Long): List<RegistroAlimentoSalida>
 }
 
 object RetrofitClientRegistroAlimento {

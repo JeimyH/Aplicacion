@@ -18,20 +18,39 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
         private set
 
     var estadoCarga by mutableStateOf(false)
+        private set
 
-    init {
+    /** Metodo público para recargar los datos cuando cambia el usuario logueado */
+    fun cargarDatosUsuarioActual() {
         viewModelScope.launch {
-            val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
-            if (idUsuario != null) {
-                cargarRegistroDeHoy(idUsuario)
+            try {
+                val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+                if (idUsuario != null) {
+                    cargarRegistroDeHoy(idUsuario)
+                } else {
+                    Log.e("RegistroAguaViewModel", "ID de usuario no encontrado en DataStore")
+                    vasosConsumidosHoy = 0
+                }
+            } catch (e: Exception) {
+                Log.e("RegistroAguaViewModel", "Error al obtener ID de usuario actual: ${e.message}")
+                vasosConsumidosHoy = 0
             }
         }
     }
 
     private suspend fun cargarRegistroDeHoy(idUsuario: Long) {
         estadoCarga = true
-        repository.obtenerRegistroDeHoy(idUsuario).onSuccess { registro ->
-            vasosConsumidosHoy = (registro?.cantidadml ?: 0) / 250
+        try {
+            repository.obtenerRegistroDeHoy(idUsuario).onSuccess { registro ->
+                vasosConsumidosHoy = (registro?.cantidadml ?: 0) / 250
+                Log.d("RegistroAguaViewModel", "Registro cargado: ${registro?.cantidadml} ml")
+            }.onFailure {
+                vasosConsumidosHoy = 0
+                Log.e("RegistroAguaViewModel", "Error al obtener registro de hoy: ${it.message}")
+            }
+        } catch (e: Exception) {
+            vasosConsumidosHoy = 0
+            Log.e("RegistroAguaViewModel", "Excepción al cargar registro de hoy: ${e.message}")
         }
         estadoCarga = false
     }
@@ -42,15 +61,22 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
 
     fun registrarAgua() {
         viewModelScope.launch {
-            val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
-            if (idUsuario != null) {
-                val cantidadml = vasosConsumidosHoy * 250
-                repository.registrarAgua(idUsuario, cantidadml).onSuccess {
-                    Log.d("InicioViewModel", "Registro actualizado: $it")
-                }.onFailure {
-                    Log.e("InicioViewModel", "Error al registrar: ${it.message}")
+            try {
+                val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+                if (idUsuario != null) {
+                    val cantidadml = vasosConsumidosHoy * 250
+                    repository.registrarAgua(idUsuario, cantidadml).onSuccess {
+                        Log.d("RegistroAguaViewModel", "Registro actualizado correctamente: $it")
+                    }.onFailure {
+                        Log.e("RegistroAguaViewModel", "Error al registrar agua: ${it.message}")
+                    }
+                } else {
+                    Log.e("RegistroAguaViewModel", "ID de usuario nulo al registrar agua")
                 }
+            } catch (e: Exception) {
+                Log.e("RegistroAguaViewModel", "Excepción al registrar agua: ${e.message}")
             }
         }
     }
 }
+

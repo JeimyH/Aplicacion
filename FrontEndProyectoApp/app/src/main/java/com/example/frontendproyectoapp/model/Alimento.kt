@@ -1,7 +1,7 @@
 package com.example.frontendproyectoapp.model
 
 data class Alimento (
-    val id_alimento: Long,
+    val idAlimento: Long,
     val nombreAlimento: String,
     val calorias: Float,
     val proteinas: Float,
@@ -12,7 +12,7 @@ data class Alimento (
     val sodio: Float,
     val grasasSaturadas: Float,
     val categoria: String,
-    val urlImagen: String,
+    val urlImagen: String? = null,
     val cantidadBase: Float,
     val unidadBase: String
 )

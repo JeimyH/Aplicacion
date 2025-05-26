@@ -3,10 +3,13 @@ package com.example.frontendproyectoapp.screen
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -48,18 +51,19 @@ fun RegistroVent2ScreenContent(
     val alturas = (140..220).map { "$it cm" }
     val pesos = (40..200).map { "$it kg" }
 
-    var sexo by remember { mutableStateOf(viewModel.sexo.ifEmpty { "Sexo" })}
+    var sexo by remember { mutableStateOf(viewModel.sexo.ifEmpty { "Sexo" }) }
     var altura by remember { mutableStateOf(if (viewModel.altura > 0) "${viewModel.altura.toInt()} cm" else "Altura") }
-    var peso by remember { mutableStateOf(if (viewModel.peso > 0) "${viewModel.peso.toInt()} kg" else "Peso")  }
+    var peso by remember { mutableStateOf(if (viewModel.peso > 0) "${viewModel.peso.toInt()} kg" else "Peso") }
 
     var expandedSexo by remember { mutableStateOf(false) }
-    var expandedAltura by remember { mutableStateOf(false)}
+    var expandedAltura by remember { mutableStateOf(false) }
     var expandedPeso by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    var fechaNacimiento by remember {  mutableStateOf(viewModel.fechaNacimiento.ifEmpty { "Selecciona tu fecha de nacimiento" }) }
+    var fechaNacimiento by remember {
+        mutableStateOf(viewModel.fechaNacimiento.ifEmpty { "Selecciona tu fecha de nacimiento" })
+    }
 
-    // DatePickerDialog
     val calendar = Calendar.getInstance()
     val datePickerDialog = DatePickerDialog(
         context,
@@ -75,58 +79,69 @@ fun RegistroVent2ScreenContent(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(24.dp)
     ) {
+        // Icono atrás en la parte superior izquierda
         Icon(
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Atrás",
             modifier = Modifier
-                .align(Alignment.Start)
+                .align(Alignment.TopStart)
                 .clickable { onBackClick() }
         )
 
-        Text("Cuéntanos sobre ti")
+        // Contenido desplazable centrado
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Cuéntanos sobre ti", modifier = Modifier.padding(bottom = 16.dp))
 
-        DropdownSelector("Sexo", sexo, sexos, expandedSexo, { expandedSexo = it }) {
-            sexo = it
-            viewModel.sexo = it
-            expandedSexo = false
-        }
-
-        OutlinedTextField(
-            value = fechaNacimiento,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Fecha de Nacimiento") },
-            trailingIcon = {
-                IconButton(onClick = { datePickerDialog.show() }) {
-                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
-                }
-            },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-        DropdownSelector("Altura", altura, alturas, expandedAltura, { expandedAltura = it }) {
-            altura = it
-            viewModel.altura = it.replace(" cm", "").toFloat()
-            expandedAltura = false
-        }
-
-        DropdownSelector("Peso", peso, pesos, expandedPeso, { expandedPeso = it }) {
-            peso = it
-            viewModel.peso = it.replace(" kg", "").toFloat()
-            expandedPeso = false
-        }
-
-        Button(
-            onClick = {
-                onContinuarClick()
+            DropdownSelector("Sexo", sexo, sexos, expandedSexo, { expandedSexo = it }) {
+                sexo = it
+                viewModel.sexo = it
+                expandedSexo = false
             }
+
+            OutlinedTextField(
+                value = fechaNacimiento,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha de Nacimiento") },
+                trailingIcon = {
+                    IconButton(onClick = { datePickerDialog.show() }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            DropdownSelector("Altura", altura, alturas, expandedAltura, { expandedAltura = it }) {
+                altura = it
+                viewModel.altura = it.replace(" cm", "").toFloat()
+                expandedAltura = false
+            }
+
+            DropdownSelector("Peso", peso, pesos, expandedPeso, { expandedPeso = it }) {
+                peso = it
+                viewModel.peso = it.replace(" kg", "").toFloat()
+                expandedPeso = false
+            }
+        }
+
+        // Botón "Continuar" en la parte inferior
+        Button(
+            onClick = onContinuarClick,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                //.fillMaxWidth()
         ) {
             Text("Continuar")
         }

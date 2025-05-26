@@ -29,21 +29,23 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(correo: String, contrasena: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
+
             val result = repositoryUsuario.login(correo, contrasena)
-            _uiState.value = result.fold(
+
+            result.fold(
                 onSuccess = { usuario ->
-                    viewModelScope.launch {
-                        UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
-                        Log.d("LoginViewModel", "ID de usuario guardado: ${usuario.idUsuario}")
-                    }
-                    LoginUiState.Success(usuario)
+                    // ✅ Guardar el ID de forma secuencial y segura
+                    UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
+                    Log.d("LoginViewModel", "ID de usuario guardado: ${usuario.idUsuario}")
+                    _uiState.value = LoginUiState.Success(usuario)
                 },
                 onFailure = {
-                    LoginUiState.Error(it.message ?: "Error desconocido")
+                    _uiState.value = LoginUiState.Error(it.message ?: "Error desconocido")
                 }
             )
         }
     }
+
 
     fun resetState() {
         _uiState.value = LoginUiState.Idle

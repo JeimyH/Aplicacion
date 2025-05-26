@@ -33,9 +33,9 @@ fun RegistroVent8ScreenContent(
     onClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    var correo by remember { mutableStateOf(viewModel.nombre) }
-    var contrasena by remember { mutableStateOf(viewModel.correo) }
-    var nombre by remember { mutableStateOf(viewModel.contrasena) }
+    var nombre by remember { mutableStateOf(viewModel.nombre) }
+    var correo by remember { mutableStateOf(viewModel.correo) }
+    var contrasena by remember { mutableStateOf(viewModel.contrasena) }
 
     val context = LocalContext.current
 
@@ -50,47 +50,60 @@ fun RegistroVent8ScreenContent(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        IconButton(onClick = onBackClick) {
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // Botón atrás
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+        ) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
         }
 
-        OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = { Text("Nombre de Usuario") },
+        // Contenido centrado
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
+                .align(Alignment.Center)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre de Usuario") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
 
-        OutlinedTextField(
-            value = correo,
-            onValueChange = { correo = it },
-            label = { Text("Correo") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
+            OutlinedTextField(
+                value = correo,
+                onValueChange = { correo = it },
+                label = { Text("Correo") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
 
-        OutlinedTextField(
-            value = contrasena,
-            onValueChange = { contrasena = it },
-            label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
+            OutlinedTextField(
+                value = contrasena,
+                onValueChange = { contrasena = it },
+                label = { Text("Contraseña") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
 
+            viewModel.errorRegistro?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = it, color = Color.Red)
+            }
+        }
+
+        // Botón Registrarse en la parte inferior
         Button(
             onClick = {
-                // Actualiza los valores en el ViewModel
                 viewModel.nombre = nombre
                 viewModel.correo = correo
                 viewModel.contrasena = contrasena
@@ -104,16 +117,16 @@ fun RegistroVent8ScreenContent(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(24.dp)
         ) {
             Text("Registrarse")
         }
-        viewModel.errorRegistro?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it, color = Color.Red)
-        }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

@@ -17,8 +17,8 @@ interface AlimentoService {
     @GET("/api/Alimento/listar")
     suspend fun listarAlimentos(): List<Alimento>
 
-    @GET("/api/Alimento/buscar/{id_alimento}")
-    suspend fun listarIdAlimento(@Path("id_alimento") id_alimento: Long): Alimento
+    @GET("/api/Alimento/buscar/{idAlimento}")
+    suspend fun listarIdAlimento(@Path("idAlimento") idAlimento: Long): Alimento
 
     @POST("/api/Alimento/guardar")
     suspend fun guardarAlimento(@Body alimento: Alimento): Alimento
@@ -29,19 +29,34 @@ interface AlimentoService {
     @PUT("/api/Alimento/actualizar/{id_alimento}")
     suspend fun actualizarAlimento(@Path("id_alimento") id_alimento: Long, @Body alimentoActualizado: Alimento): Alimento
 
-    @GET("api/Alimento/alimentoNombre/{nombre}")
-    suspend fun obtenerAlimentoPorNombre(@Path("nombre") nombre: String): Alimento
-
     @GET("api/Alimento/alimentoCategoria/{categoria}")
     suspend fun obtenerAlimentosPorCategoria(@Path("categoria") categoria: String): List<Alimento>
 
-    //Pendiente
-    @GET("api/Alimento/alimentoUsuario/{id_usuario}")
-    suspend fun obtenerAlimentoPorUsuario(@Path("id_usuario") id_usuario: Long): List<Alimento>
+    @GET("/api/Alimento/buscar/nombre/{nombre}")
+    suspend fun obtenerAlimentoPorNombre(@Path("nombre") nombre: String): Alimento
 
-    //Pendiente
-    @GET("api/Alimento/InfNutricional/{id_alimento}")
-    suspend fun obtenerInfNutricional(@Path("id_alimento") id_alimento: Long): Alimento
+    @GET("/api/Alimento/buscar/coincidencias/{nombre}")
+    suspend fun buscarCoincidencias(@Path("nombre") nombre: String): List<Alimento>
+
+    @GET("/api/Alimento/categoria/{categoria}")
+    suspend fun listarPorCategoria(@Path("categoria") categoria: String): List<Alimento>
+
+    @GET("/api/Alimento/favoritos/{idUsuario}")
+    suspend fun obtenerFavoritos(@Path("idUsuario") idUsuario: Long): List<Alimento>
+
+    @POST("/api/Alimento/favoritoAgregar/{idUsuario}/{idAlimento}")
+    suspend fun marcarFavorito(
+        @Path("idUsuario") idUsuario: Long,
+        @Path("idAlimento") idAlimento: Long
+    )
+
+    @DELETE("/api/Alimento/favoritoEliminar/{idUsuario}/{idAlimento}")
+    suspend fun eliminarFavorito(
+        @Path("idUsuario") idUsuario: Long,
+        @Path("idAlimento") idAlimento: Long
+    )
+
+
 }
 
 object RetrofitClientAlimento {

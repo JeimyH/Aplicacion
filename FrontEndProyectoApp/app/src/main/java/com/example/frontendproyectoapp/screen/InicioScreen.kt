@@ -4,6 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +27,7 @@ import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.viewModel.RegistroAguaViewModel
 import com.example.frontendproyectoapp.viewModel.RegistroAguaViewModelFactory
 import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun InicioScreen(navController: NavHostController) {
@@ -41,24 +45,22 @@ fun InicioScreenContent(
     viewModel: RegistroAguaViewModel,
     navController: NavHostController
 ) {
-    val scope = rememberCoroutineScope()
-
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-
-    // recolectamos el valor actual del StateFlow aguaConsumida
-    //val aguaConsumida by viewModel.aguaConsumida
+    var selectedDate by remember { mutableStateOf(LocalDate.now(ZoneId.systemDefault())) }
 
     val context = LocalContext.current
-    var idUsuario by remember { mutableStateOf<Long?>(null) }
+    val idUsuarioFlow = produceState<Long?>(initialValue = null) {
+        UserPreferences.obtenerIdUsuario(context).collect {
+            value = it
+        }
+    }
 
+    val cantidadVasos = 8
     val vasosConsumidos = viewModel.vasosConsumidosHoy
     val estadoCarga = viewModel.estadoCarga
 
-    LaunchedEffect(Unit) {
-        UserPreferences.obtenerIdUsuario(context).collect { id ->
-            idUsuario = id
-            Log.d("RegistroAgua", "ID del usuario: $id")
-        }
+    // Cargar el registro del usuario actual cada vez que cambia
+    LaunchedEffect(idUsuarioFlow.value) {
+        viewModel.cargarDatosUsuarioActual()
     }
 
     Scaffold(
@@ -122,12 +124,16 @@ fun InicioScreenContent(
 
             Spacer(Modifier.height(16.dp))
 
-            Row(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp), // ajusta si necesitas más espacio
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                userScrollEnabled = false
             ) {
-                (1..8).forEach { vaso ->
+                items((1..cantidadVasos).toList()) { vaso ->
                     val seleccionado = vaso <= vasosConsumidos
                     IconButton(
                         onClick = {

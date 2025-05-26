@@ -70,6 +70,8 @@ dependencies {
 
 // Icons extended (importante para usar Icons.Filled.Restaurant)
     implementation(libs.material.icons.extended)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
 
     // Lifecycle and viewModel
     implementation(libs.lifecycle.viewmodel.compose)

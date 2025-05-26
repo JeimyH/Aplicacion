@@ -1,12 +1,14 @@
 package com.example.frontendproyectoapp.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -55,60 +57,66 @@ fun RegistroVent4ScreenContent(
 
     var seleccionDieta by remember { mutableStateOf("") }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(24.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        // Botón atrás fijo arriba a la izquierda
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier.align(Alignment.TopStart)
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
+        }
+
+        // Contenido principal centrado y desplazable
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "¿Qué tipo de dieta prefieres?",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            opcionesDieta.forEach { tipoDieta ->
+                OutlinedButton(
+                    onClick = {
+                        seleccionDieta = tipoDieta
+                        viewModel.restriccionesDieta = tipoDieta
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (tipoDieta == seleccionDieta) Color(0xFFB3E5FC) else Color.Transparent
+                    )
+                ) {
+                    Text(text = tipoDieta)
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "¿Qué tipo de dieta prefieres?",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        opcionesDieta.forEach { tipoDieta ->
-            OutlinedButton(
-                onClick = {
-                    seleccionDieta = tipoDieta
-                    viewModel.restriccionesDieta = tipoDieta
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = if (tipoDieta == seleccionDieta) Color(0xFFB3E5FC) else Color.Transparent
-                )
-            ) {
-                Text(text = tipoDieta)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
+        // Botón continuar anclado en la parte inferior
         Button(
             onClick = onClick,
-            enabled = seleccionDieta.isNotEmpty()
+            enabled = seleccionDieta.isNotEmpty(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                //.fillMaxWidth()
+
         ) {
             Text("Continuar")
         }
     }
 }
+
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
