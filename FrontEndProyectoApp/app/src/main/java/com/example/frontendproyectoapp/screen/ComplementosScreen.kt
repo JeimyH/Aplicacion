@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,8 +33,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,10 +46,15 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -68,33 +76,52 @@ fun NutrientRow(nombre: String, consumido: Int, recomendado: Int) {
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
-    NavigationBar {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Restaurant, contentDescription = "Inicio") },
-            label = { Text("Inicio") },
-            selected = false,
-            onClick = { navController.navigate("inicio") }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Search, contentDescription = "Buscar Alimentos") },
-            label = { Text("Buscar Alimentos") },
-            selected = false,
-            onClick = { navController.navigate("buscarAlimentos") }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Book, contentDescription = "Rutina") },
-            label = { Text("Rutina") },
-            selected = false,
-            onClick = { navController.navigate("rutina") }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Assessment, contentDescription = "Estadísticas") },
-            label = { Text("Estadísticas") },
-            selected = false,
-            onClick = { navController.navigate("estadisticas") }
-        )
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination?.route
+
+    val items = listOf(
+        BottomNavItem("inicio", Icons.Default.Restaurant, "Inicio"),
+        BottomNavItem("buscarAlimentos", Icons.Default.Search, "Buscar"),
+        BottomNavItem("rutina", Icons.Default.Book, "Rutina"),
+        BottomNavItem("estadisticas", Icons.Default.Assessment, "Estadísticas")
+    )
+
+    NavigationBar(
+        tonalElevation = 8.dp,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = {
+                    Icon(imageVector = item.icon, contentDescription = item.label)
+                },
+                label = {
+                    Text(text = item.label, style = MaterialTheme.typography.labelSmall)
+                },
+                selected = currentDestination == item.route,
+                onClick = {
+                    if (currentDestination != item.route) {
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                        }
+                    }
+                },
+                alwaysShowLabel = true
+            )
+        }
     }
 }
+
+data class BottomNavItem(
+    val route: String,
+    val icon: ImageVector,
+    val label: String
+)
+
 
 @Composable
 fun DropdownSelector(
@@ -103,9 +130,12 @@ fun DropdownSelector(
     options: List<String>,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    onItemSelected: (String) -> Unit
+    onItemSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Box {
+    var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(modifier = modifier) {
         OutlinedTextField(
             value = selected,
             onValueChange = {},
@@ -118,11 +148,18 @@ fun DropdownSelector(
                     modifier = Modifier.clickable { onExpandedChange(!expanded) }
                 )
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    textFieldSize = coordinates.size
+                }
         )
+
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier
+                .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
         ) {
             options.forEach { option ->
                 DropdownMenuItem(

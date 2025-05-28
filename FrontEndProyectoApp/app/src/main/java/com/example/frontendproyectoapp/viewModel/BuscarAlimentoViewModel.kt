@@ -10,6 +10,7 @@ import com.example.frontendproyectoapp.model.RegistroAlimento
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
+import com.example.frontendproyectoapp.repository.FavoritosRepository
 import com.example.frontendproyectoapp.repository.RegistroAlimentoRepository
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,44 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
             cargarDatos()
         }
     }
+
+    private val favoritosRepository = FavoritosRepository()
+
+    init {
+        viewModelScope.launch {
+            idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+            idUsuario?.let {
+                cargarDatos()
+                cargarFavoritos()
+            }
+        }
+    }
+
+    fun cargarFavoritos() {
+        viewModelScope.launch {
+            idUsuario?.let {
+                favoritos = favoritosRepository.obtenerFavoritos(it)
+            }
+        }
+    }
+
+    fun toggleFavorito(alimento: Alimento) {
+        viewModelScope.launch {
+            try {
+                idUsuario?.let { uid ->
+                    if (esFavorito(alimento.idAlimento)) {
+                        favoritosRepository.eliminarFavorito(uid, alimento.idAlimento)
+                    } else {
+                        favoritosRepository.marcarFavorito(uid, alimento.idAlimento)
+                    }
+                    cargarFavoritos()
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error actualizando favorito: ${e.message}")
+            }
+        }
+    }
+
 
     fun cargarDatos() {
         viewModelScope.launch {
@@ -65,23 +104,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
 
     fun esFavorito(idAlimento: Long): Boolean {
         return favoritos.any { it.idAlimento == idAlimento }
-    }
-
-    fun toggleFavorito(alimento: Alimento) {
-        viewModelScope.launch {
-            try {
-                idUsuario?.let { uid ->
-                    if (esFavorito(alimento.idAlimento)) {
-                        repository.eliminarFavorito(uid, alimento.idAlimento)
-                    } else {
-                        repository.marcarFavorito(uid, alimento.idAlimento)
-                    }
-                    favoritos = repository.obtenerFavoritos(uid)
-                }
-            } catch (e: Exception) {
-                Log.e("BuscarVM", "Error actualizando favorito: ${e.message}")
-            }
-        }
     }
 
     fun agregarARecientes(alimento: Alimento) {

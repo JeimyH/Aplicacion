@@ -37,7 +37,8 @@ fun BuscarAlimentoScreen(navController: NavHostController) {
 
 
 @Composable
-fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
+fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel,
+                                navController: NavHostController) {
     val mostrarBaseDatos = remember { mutableStateOf(false) }
 
     Scaffold(bottomBar = { BottomNavigationBar(navController) }) { innerPadding ->
@@ -146,26 +147,6 @@ fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navControlle
     }
 }
 
-@Composable
-fun AlimentoItem(alimento: Alimento, onFavoritoClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .background(Color(0xFFF1F1F1), shape = RoundedCornerShape(8.dp))
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(alimento.nombreAlimento, style = MaterialTheme.typography.bodyLarge)
-            Text(alimento.categoria, style = MaterialTheme.typography.bodySmall)
-        }
-        IconButton(onClick = onFavoritoClick) {
-            Icon(Icons.Default.FavoriteBorder, contentDescription = "Marcar favorito")
-        }
-    }
-}
 @Composable
 fun AlimentoItem(
     alimento: Alimento,

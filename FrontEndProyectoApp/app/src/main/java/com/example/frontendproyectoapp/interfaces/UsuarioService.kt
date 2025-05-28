@@ -41,7 +41,7 @@ interface UsuarioService {
     //suspend fun login(@Body login: Login): UsuarioRespuesta
 
     @POST("/api/Usuario/registrar")
-    fun registrarUsuario(@Body usuario: UsuarioEntrada): Call<Void>  // o Call<UsuarioRespuestaDTO> si quieres usar la respuesta
+    fun registrarUsuario(@Body usuario: UsuarioEntrada): Call<UsuarioRespuesta>  // o Call<UsuarioRespuestaDTO> si quieres usar la respuesta
 
 }
 

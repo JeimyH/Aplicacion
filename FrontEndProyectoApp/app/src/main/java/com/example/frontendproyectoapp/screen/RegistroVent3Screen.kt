@@ -2,7 +2,6 @@ package com.example.frontendproyectoapp.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -63,7 +62,8 @@ fun RegistroVent3ScreenContent(
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp), // padding para que no quede pegado a los bordes
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -72,7 +72,7 @@ fun RegistroVent3ScreenContent(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = "Según tu altura, tu peso saludable está entre $pesoMin kg y $pesoMax kg",
@@ -80,7 +80,7 @@ fun RegistroVent3ScreenContent(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = pesoObjetivo.toString(),
@@ -102,13 +102,13 @@ fun RegistroVent3ScreenContent(
             enabled = pesoObjetivo in 30..300,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                //.fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .fillMaxWidth(0.5f) // botón medio ancho, ajusta si quieres otro tamaño
         ) {
             Text("Continuar")
         }
     }
 }
-
 
 
 @Preview(showBackground = true)

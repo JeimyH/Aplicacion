@@ -21,22 +21,26 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
         private set
 
     /** Metodo público para recargar los datos cuando cambia el usuario logueado */
-    fun cargarDatosUsuarioActual() {
+    fun cargarDatosUsuarioActual(idUsuario: Long?) {
+        if (idUsuario == null) {
+            vasosConsumidosHoy = 0
+            return
+        }
         viewModelScope.launch {
+            estadoCarga = true
             try {
-                val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
-                if (idUsuario != null) {
-                    cargarRegistroDeHoy(idUsuario)
-                } else {
-                    Log.e("RegistroAguaViewModel", "ID de usuario no encontrado en DataStore")
+                repository.obtenerRegistroDeHoy(idUsuario).onSuccess { registro ->
+                    vasosConsumidosHoy = (registro?.cantidadml ?: 0) / 250
+                }.onFailure {
                     vasosConsumidosHoy = 0
                 }
             } catch (e: Exception) {
-                Log.e("RegistroAguaViewModel", "Error al obtener ID de usuario actual: ${e.message}")
                 vasosConsumidosHoy = 0
             }
+            estadoCarga = false
         }
     }
+
 
     private suspend fun cargarRegistroDeHoy(idUsuario: Long) {
         estadoCarga = true

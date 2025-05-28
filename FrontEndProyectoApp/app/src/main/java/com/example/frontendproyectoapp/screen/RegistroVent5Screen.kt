@@ -55,9 +55,9 @@ fun RegistroVent5ScreenContent(
     val alturaCm = viewModel.altura
     val altura = alturaCm / 100
     val sexo = viewModel.sexo
-    val edad = calcularEdad(viewModel.fechaNacimiento)
+    val edad = calcularEdadReg5(viewModel.fechaNacimiento)
 
-    // Calorías usando Mifflin-St Jeor
+    // Cálculo de TMB y calorías
     val tmb = if (sexo == "Masculino") {
         10 * peso + 6.25 * alturaCm - 5 * edad + 5
     } else {
@@ -68,7 +68,6 @@ fun RegistroVent5ScreenContent(
     val caloriasMax = (tmb * 1.55).toInt()
     val caloriasProm = (caloriasMin + caloriasMax) / 2
 
-    // Macronutrientes aproximados
     val proteinas = (caloriasProm * 0.2 / 4).toInt()
     val carbohidratos = (caloriasProm * 0.5 / 4).toInt()
     val grasas = (caloriasProm * 0.3 / 9).toInt()
@@ -87,8 +86,9 @@ fun RegistroVent5ScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
+        // Botón atrás
         IconButton(
             onClick = onBackClick,
             modifier = Modifier.align(Alignment.TopStart)
@@ -101,8 +101,9 @@ fun RegistroVent5ScreenContent(
 
         Column(
             modifier = Modifier
-                .align(Alignment.Center)
-                .verticalScroll(rememberScrollState()),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 56.dp, bottom = 80.dp), // espacio para botón y flecha atrás
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -112,20 +113,33 @@ fun RegistroVent5ScreenContent(
                     }
                     append("hemos calculado tus necesidades diarias.")
                 },
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
             )
 
+            // Gráfico de calorías
             CaloriasGraph(caloriasMin = caloriasMin, caloriasMax = caloriasMax)
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
+            // Título de sección
+            Text(
+                text = "Distribución de macronutrientes",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Lista de nutrientes
             nutrientes.forEach { (nombre, valor) ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text = nombre, fontSize = 16.sp)
@@ -134,16 +148,21 @@ fun RegistroVent5ScreenContent(
             }
         }
 
+        // Botón continuar
         Button(
             onClick = onClick,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
             Text("Continuar")
         }
     }
 }
 
-fun calcularEdad(fechaNacimiento: String): Int {
+
+fun calcularEdadReg5(fechaNacimiento: String): Int {
     return try {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val fecha = LocalDate.parse(fechaNacimiento, formatter)

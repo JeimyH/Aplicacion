@@ -1,10 +1,14 @@
 package com.example.frontendproyectoapp
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.frontendproyectoapp.navigation.AppNavigation
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
@@ -14,17 +18,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // RegistroUsuarioScreen()
+            val context = LocalContext.current.applicationContext as Application
 
-            // Crear un solo viewModel compartido paratodo el flujo de registro
-            val usuarioViewModel = remember { UsuarioViewModel() }
+            val usuarioViewModel: UsuarioViewModel = viewModel(
+                factory = ViewModelProvider.AndroidViewModelFactory(context)
+            )
+
             val navController = rememberNavController()
             AppNavigation(
                 navController = navController,
                 viewModel = usuarioViewModel
             )
-
-
         }
     }
 }

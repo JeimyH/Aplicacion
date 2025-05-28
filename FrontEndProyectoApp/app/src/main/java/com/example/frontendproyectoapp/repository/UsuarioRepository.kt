@@ -52,16 +52,21 @@ class UsuarioRepository {
         }
     }
 
-    fun registrarUsuario(usuario: UsuarioEntrada, onResult: (Boolean) -> Unit) {
+    fun registrarUsuario(usuario: UsuarioEntrada, onResultado: (UsuarioRespuesta?) -> Unit) {
         val call = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                onResult(response.isSuccessful)
+        call.enqueue(object : Callback<UsuarioRespuesta> {
+            override fun onResponse(call: Call<UsuarioRespuesta>, response: Response<UsuarioRespuesta>) {
+                if (response.isSuccessful) {
+                    onResultado(response.body()) // ✅ Retorna el objeto completo
+                } else {
+                    onResultado(null)
+                }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                onResult(false)
+            override fun onFailure(call: Call<UsuarioRespuesta>, t: Throwable) {
+                onResultado(null)
             }
         })
     }
+
 }

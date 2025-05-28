@@ -12,4 +12,8 @@ class RegistroAlimentoRepository {
     suspend fun obtenerComidasRecientes(idUsuario: Long): List<RegistroAlimentoSalida> {
         return RetrofitClientRegistroAlimento.registroAlimentoService.obtenerComidasRecientes(idUsuario)
     }
+
+    suspend fun obtenerRegistrosAgrupados(idUsuario: Long, fecha: String): Map<String, List<RegistroAlimentoSalida>> {
+        return RetrofitClientRegistroAlimento.registroAlimentoService.obtenerRegistrosAgrupadosPorMomento(idUsuario, fecha)
+    }
 }

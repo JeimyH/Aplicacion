@@ -14,7 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 
@@ -33,11 +35,19 @@ fun RegistroVent8ScreenContent(
     onClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    var nombre by remember { mutableStateOf(viewModel.nombre) }
-    var correo by remember { mutableStateOf(viewModel.correo) }
-    var contrasena by remember { mutableStateOf(viewModel.contrasena) }
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
+    var confirmarContrasena by remember { mutableStateOf("") }
+
+    var correoError by remember { mutableStateOf("") }
+    var contrasenaError by remember { mutableStateOf("") }
+    var confirmarContrasenaError by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+
+    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
+    val passwordRegex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")
 
     if (viewModel.cargando) {
         AlertDialog(
@@ -78,22 +88,71 @@ fun RegistroVent8ScreenContent(
 
             OutlinedTextField(
                 value = correo,
-                onValueChange = { correo = it },
+                onValueChange = {
+                    correo = it
+                    correoError = if (emailRegex.matches(it)) "" else "Correo no válido"
+                },
                 label = { Text("Correo") },
+                isError = correoError.isNotEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
+            if (correoError.isNotEmpty()) {
+                Text(
+                    text = correoError,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
 
             OutlinedTextField(
                 value = contrasena,
-                onValueChange = { contrasena = it },
+                onValueChange = {
+                    contrasena = it
+                    contrasenaError = if (passwordRegex.matches(it)) "" else
+                        "Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
+                    // También actualizar la confirmación al cambiar la contraseña
+                    confirmarContrasenaError = if (confirmarContrasena == contrasena) "" else "Las contraseñas no coinciden"
+                },
                 label = { Text("Contraseña") },
                 visualTransformation = PasswordVisualTransformation(),
+                isError = contrasenaError.isNotEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
+            if (contrasenaError.isNotEmpty()) {
+                Text(
+                    text = contrasenaError,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            OutlinedTextField(
+                value = confirmarContrasena,
+                onValueChange = {
+                    confirmarContrasena = it
+                    confirmarContrasenaError = if (it == contrasena) "" else "Las contraseñas no coinciden"
+                },
+                label = { Text("Confirmar Contraseña") },
+                visualTransformation = PasswordVisualTransformation(),
+                isError = confirmarContrasenaError.isNotEmpty(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+            if (confirmarContrasenaError.isNotEmpty()) {
+                Text(
+                    text = confirmarContrasenaError,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
 
             viewModel.errorRegistro?.let {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -104,6 +163,24 @@ fun RegistroVent8ScreenContent(
         // Botón Registrarse en la parte inferior
         Button(
             onClick = {
+                // Validar antes de registrar
+                val isEmailValid = emailRegex.matches(correo)
+                val isPasswordValid = passwordRegex.matches(contrasena)
+                val isConfirmPasswordValid = confirmarContrasena == contrasena
+
+                if (!isEmailValid) {
+                    correoError = "Correo no válido"
+                    return@Button
+                }
+                if (!isPasswordValid) {
+                    contrasenaError = "Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
+                    return@Button
+                }
+                if (!isConfirmPasswordValid) {
+                    confirmarContrasenaError = "Las contraseñas no coinciden"
+                    return@Button
+                }
+
                 viewModel.nombre = nombre
                 viewModel.correo = correo
                 viewModel.contrasena = contrasena
@@ -126,6 +203,8 @@ fun RegistroVent8ScreenContent(
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true, showSystemUi = true)

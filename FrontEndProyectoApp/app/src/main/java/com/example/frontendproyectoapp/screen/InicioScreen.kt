@@ -60,7 +60,7 @@ fun InicioScreenContent(
 
     // Cargar el registro del usuario actual cada vez que cambia
     LaunchedEffect(idUsuarioFlow.value) {
-        viewModel.cargarDatosUsuarioActual()
+        viewModel.cargarDatosUsuarioActual(idUsuarioFlow.value)
     }
 
     Scaffold(

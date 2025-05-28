@@ -55,8 +55,6 @@ interface AlimentoService {
         @Path("idUsuario") idUsuario: Long,
         @Path("idAlimento") idAlimento: Long
     )
-
-
 }
 
 object RetrofitClientAlimento {
