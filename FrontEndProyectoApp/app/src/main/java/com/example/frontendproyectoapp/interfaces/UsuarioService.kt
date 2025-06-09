@@ -1,5 +1,6 @@
 package com.example.frontendproyectoapp.interfaces
 
+import com.example.frontendproyectoapp.model.DisponibilidadResponse
 import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
@@ -16,6 +17,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface UsuarioService {
     @GET("/api/Usuario/listar")
@@ -33,15 +35,17 @@ interface UsuarioService {
     @PUT("/api/Usuario/actualizar/{idUsuario}")
     suspend fun actualizarUsuario(@Path("idUsuario") idUsuario: Long, @Body usuario: Usuario): Usuario
 
-
     @POST("/api/Usuario/login")
     suspend fun login(@Body login: Login): Response<UsuarioRespuesta>
 
-    //@POST("/api/Usuario/login")
-    //suspend fun login(@Body login: Login): UsuarioRespuesta
-
     @POST("/api/Usuario/registrar")
     fun registrarUsuario(@Body usuario: UsuarioEntrada): Call<UsuarioRespuesta>  // o Call<UsuarioRespuestaDTO> si quieres usar la respuesta
+
+    @GET("usuarios/disponible/nombre")
+    suspend fun verificarNombre(@Query("nombre") nombre: String): DisponibilidadResponse
+
+    @GET("usuarios/disponible/correo")
+    suspend fun verificarCorreo(@Query("correo") correo: String): DisponibilidadResponse
 
 }
 

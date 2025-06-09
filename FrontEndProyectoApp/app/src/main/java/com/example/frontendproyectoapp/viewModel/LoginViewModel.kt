@@ -34,13 +34,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             result.fold(
                 onSuccess = { usuario ->
-                    // ✅ Guardar el ID de forma secuencial y segura
+                    // Guardar el ID de forma secuencial y segura
                     UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
                     Log.d("LoginViewModel", "ID de usuario guardado: ${usuario.idUsuario}")
                     _uiState.value = LoginUiState.Success(usuario)
                 },
                 onFailure = {
-                    _uiState.value = LoginUiState.Error(it.message ?: "Error desconocido")
+                    val errorMessage = when (it.message) {
+                        "Correo o contraseña incorrectos" -> "Correo o contraseña incorrectos. Por favor, verifica tus credenciales."
+                        "Respuesta vacía" -> "Error en el servidor. Inténtalo de nuevo más tarde."
+                        else -> "Ocurrió un error durante el inicio de sesión. Inténtalo de nuevo."
+                    }
+                    _uiState.value = LoginUiState.Error(errorMessage)
                 }
             )
         }

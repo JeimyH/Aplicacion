@@ -5,9 +5,11 @@ import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.resume
 
 class UsuarioRepository {
     suspend fun obtenerUsuarios(): List<Usuario> {
@@ -30,11 +32,6 @@ class UsuarioRepository {
         return RetrofitClientUsuario.usuarioService.actualizarUsuario(id_usuario, usuario)
     }
 
-    /*
-    suspend fun loginUsuario(login: Login): UsuarioRespuesta{
-            return RetrofitClientUsuario.usuarioService.login(login)
-    }
-     */
     suspend fun login(correo: String, contrasena: String): Result<UsuarioRespuesta> {
         return try {
             val response = RetrofitClientUsuario.usuarioService.login(Login(correo, contrasena))
@@ -52,21 +49,52 @@ class UsuarioRepository {
         }
     }
 
-    fun registrarUsuario(usuario: UsuarioEntrada, onResultado: (UsuarioRespuesta?) -> Unit) {
-        val call = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
-        call.enqueue(object : Callback<UsuarioRespuesta> {
-            override fun onResponse(call: Call<UsuarioRespuesta>, response: Response<UsuarioRespuesta>) {
-                if (response.isSuccessful) {
-                    onResultado(response.body()) // ✅ Retorna el objeto completo
-                } else {
-                    onResultado(null)
-                }
-            }
+    suspend fun registrarUsuario(usuario: UsuarioEntrada): Result<UsuarioRespuesta> {
+        return suspendCancellableCoroutine { continuation ->
+            val call = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
 
-            override fun onFailure(call: Call<UsuarioRespuesta>, t: Throwable) {
-                onResultado(null)
+            call.enqueue(object : Callback<UsuarioRespuesta> {
+                override fun onResponse(call: Call<UsuarioRespuesta>, response: Response<UsuarioRespuesta>) {
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        if (body != null) {
+                            continuation.resume(Result.success(body))
+                        } else {
+                            continuation.resume(Result.failure(Exception("Respuesta vacía")))
+                        }
+                    } else {
+                        continuation.resume(Result.failure(Exception("Error: ${response.code()}")))
+                    }
+                }
+
+                override fun onFailure(call: Call<UsuarioRespuesta>, t: Throwable) {
+                    continuation.resume(Result.failure(t))
+                }
+            })
+
+            // Para cancelar la petición si la corrutina es cancelada
+            continuation.invokeOnCancellation {
+                call.cancel()
             }
-        })
+        }
     }
+
+    suspend fun verificarNombre(nombre: String): Boolean {
+        return try {
+            RetrofitClientUsuario.usuarioService.verificarNombre(nombre).isDisponible.not()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun verificarCorreo(correo: String): Boolean {
+        return try {
+            RetrofitClientUsuario.usuarioService.verificarCorreo(correo).isDisponible.not()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
 
 }

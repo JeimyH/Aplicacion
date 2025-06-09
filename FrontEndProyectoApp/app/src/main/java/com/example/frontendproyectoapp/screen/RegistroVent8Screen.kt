@@ -1,6 +1,5 @@
 package com.example.frontendproyectoapp.screen
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,8 +15,8 @@ import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -40,171 +39,157 @@ fun RegistroVent8ScreenContent(
     var contrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
 
-    var correoError by remember { mutableStateOf("") }
-    var contrasenaError by remember { mutableStateOf("") }
-    var confirmarContrasenaError by remember { mutableStateOf("") }
-
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
-    val passwordRegex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")
+    LaunchedEffect(viewModel.errorRegistro) {
+        viewModel.errorRegistro?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.errorRegistro = null
+        }
+    }
 
     if (viewModel.cargando) {
         AlertDialog(
             onDismissRequest = {},
             title = { Text("Creando cuenta") },
             text = { Text("Espera un momento...") },
-            confirmButton = {
-                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-            }
+            confirmButton = { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // Botón atrás
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-        }
-
-        // Contenido centrado
-        Column(
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre de Usuario") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
 
-            OutlinedTextField(
-                value = correo,
-                onValueChange = {
-                    correo = it
-                    correoError = if (emailRegex.matches(it)) "" else "Correo no válido"
-                },
-                label = { Text("Correo") },
-                isError = correoError.isNotEmpty(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-            if (correoError.isNotEmpty()) {
-                Text(
-                    text = correoError,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 8.dp)
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+            ) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+            }
+
+            Column(
+                modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = {
+                        nombre = it
+                        viewModel.nombreValidationError = viewModel.validateNombre(it)
+                        viewModel.verificarNombreExistente(it)
+                    },
+                    isError = viewModel.nombreValidationError != null,
+                    label = { Text("Nombre de Usuario") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
                 )
-            }
-
-            OutlinedTextField(
-                value = contrasena,
-                onValueChange = {
-                    contrasena = it
-                    contrasenaError = if (passwordRegex.matches(it)) "" else
-                        "Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
-                    // También actualizar la confirmación al cambiar la contraseña
-                    confirmarContrasenaError = if (confirmarContrasena == contrasena) "" else "Las contraseñas no coinciden"
-                },
-                label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                isError = contrasenaError.isNotEmpty(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-            if (contrasenaError.isNotEmpty()) {
-                Text(
-                    text = contrasenaError,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            OutlinedTextField(
-                value = confirmarContrasena,
-                onValueChange = {
-                    confirmarContrasena = it
-                    confirmarContrasenaError = if (it == contrasena) "" else "Las contraseñas no coinciden"
-                },
-                label = { Text("Confirmar Contraseña") },
-                visualTransformation = PasswordVisualTransformation(),
-                isError = confirmarContrasenaError.isNotEmpty(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-            if (confirmarContrasenaError.isNotEmpty()) {
-                Text(
-                    text = confirmarContrasenaError,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            viewModel.errorRegistro?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = it, color = Color.Red)
-            }
-        }
-
-        // Botón Registrarse en la parte inferior
-        Button(
-            onClick = {
-                // Validar antes de registrar
-                val isEmailValid = emailRegex.matches(correo)
-                val isPasswordValid = passwordRegex.matches(contrasena)
-                val isConfirmPasswordValid = confirmarContrasena == contrasena
-
-                if (!isEmailValid) {
-                    correoError = "Correo no válido"
-                    return@Button
-                }
-                if (!isPasswordValid) {
-                    contrasenaError = "Mínimo 8 caracteres, una mayúscula, una minúscula y un número"
-                    return@Button
-                }
-                if (!isConfirmPasswordValid) {
-                    confirmarContrasenaError = "Las contraseñas no coinciden"
-                    return@Button
+                viewModel.nombreValidationError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
                 }
 
-                viewModel.nombre = nombre
-                viewModel.correo = correo
-                viewModel.contrasena = contrasena
+                OutlinedTextField(
+                    value = correo,
+                    onValueChange = {
+                        correo = it
+                        viewModel.correoValidationError = viewModel.validateEmail(it)
+                        viewModel.verificarCorreoExistente(it)
+                    },
+                    isError = viewModel.correoValidationError != null,
+                    label = { Text("Correo") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+                viewModel.correoValidationError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                }
 
-                viewModel.registrarUsuario { success ->
-                    if (success) {
-                        Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
-                        onClick()
-                    } else {
-                        Toast.makeText(context, viewModel.errorRegistro ?: "Error desconocido", Toast.LENGTH_LONG).show()
+                OutlinedTextField(
+                    value = contrasena,
+                    onValueChange = {
+                        contrasena = it
+                        viewModel.contrasenaValidationError = viewModel.validatePassword(it)
+                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(confirmarContrasena, it)
+                    },
+                    label = { Text("Contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    isError = viewModel.contrasenaValidationError != null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+                viewModel.contrasenaValidationError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                }
+
+                OutlinedTextField(
+                    value = confirmarContrasena,
+                    onValueChange = {
+                        confirmarContrasena = it
+                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(contrasena, it)
+                    },
+                    label = { Text("Confirmar Contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    isError = viewModel.confirmarContrasenaValidationError != null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+                viewModel.confirmarContrasenaValidationError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+
+            Button(
+                onClick = {
+                    // Validar todo
+                    viewModel.nombreValidationError = viewModel.validateNombre(nombre)
+                    viewModel.correoValidationError = viewModel.validateEmail(correo)
+                    viewModel.contrasenaValidationError = viewModel.validatePassword(contrasena)
+                    viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(contrasena, confirmarContrasena)
+
+                    if (
+                        viewModel.nombreValidationError != null ||
+                        viewModel.correoValidationError != null ||
+                        viewModel.contrasenaValidationError != null ||
+                        viewModel.confirmarContrasenaValidationError != null
+                    ) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Por favor corrige los errores antes de continuar")
+                        }
+                        return@Button
                     }
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            Text("Registrarse")
+
+                    viewModel.nombre = nombre
+                    viewModel.correo = correo
+                    viewModel.contrasena = contrasena
+
+                    viewModel.registrarUsuario { success ->
+                        if (success) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Usuario registrado exitosamente")
+                            }
+                            onClick()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Text("Registrarse")
+            }
         }
     }
 }
-
-
 
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -212,3 +197,5 @@ fun RegistroVent8ScreenContent(
 fun RegistroVent8ScreenPreview(viewModel: UsuarioViewModel = viewModel()) {
     RegistroVent8ScreenContent(viewModel = viewModel)
 }
+
+
