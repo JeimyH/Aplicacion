@@ -3,8 +3,6 @@ package com.example.frontendproyectoapp.repository
 import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
 import com.example.frontendproyectoapp.interfaces.RetrofitClientRegistroAlimento
 import com.example.frontendproyectoapp.model.Alimento
-import com.example.frontendproyectoapp.model.RegistroAlimento
-import java.time.LocalDate
 
 class BuscarAlimentoRepository {
     private val alimentoService = RetrofitClientAlimento.alimentoService
@@ -25,5 +23,15 @@ class BuscarAlimentoRepository {
     suspend fun eliminarFavorito(idUsuario: Long, idAlimento: Long) {
         alimentoService.eliminarFavorito(idUsuario, idAlimento)
     }
+
+    suspend fun obtenerUrlImagen(nombre: String): String? =
+        try {
+            alimentoService.obtenerUrlImagenPorNombre(nombre)
+        } catch (e: Exception) {
+            null
+        }
+
+    suspend fun obtenerAlimentosPorCategoria(categoria: String): List<Alimento> =
+        alimentoService.obtenerAlimentosPorCategoria(categoria)
 
 }

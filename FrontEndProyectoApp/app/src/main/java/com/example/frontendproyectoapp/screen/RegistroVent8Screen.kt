@@ -1,8 +1,11 @@
 package com.example.frontendproyectoapp.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,8 +16,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
+import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 import kotlinx.coroutines.launch
 
@@ -34,10 +40,8 @@ fun RegistroVent8ScreenContent(
     onClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var confirmarContrasena by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -77,12 +81,12 @@ fun RegistroVent8ScreenContent(
                 modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Nombre de usuario
                 OutlinedTextField(
-                    value = nombre,
+                    value = viewModel.nombre,
                     onValueChange = {
-                        nombre = it
+                        viewModel.nombre = it
                         viewModel.nombreValidationError = viewModel.validateNombre(it)
-                        viewModel.verificarNombreExistente(it)
                     },
                     isError = viewModel.nombreValidationError != null,
                     label = { Text("Nombre de Usuario") },
@@ -94,12 +98,12 @@ fun RegistroVent8ScreenContent(
                     Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
                 }
 
+                // Correo
                 OutlinedTextField(
-                    value = correo,
+                    value = viewModel.correo,
                     onValueChange = {
-                        correo = it
+                        viewModel.correo = it
                         viewModel.correoValidationError = viewModel.validateEmail(it)
-                        viewModel.verificarCorreoExistente(it)
                     },
                     isError = viewModel.correoValidationError != null,
                     label = { Text("Correo") },
@@ -111,15 +115,24 @@ fun RegistroVent8ScreenContent(
                     Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
                 }
 
+                // Contraseña
                 OutlinedTextField(
-                    value = contrasena,
+                    value = viewModel.contrasena,
                     onValueChange = {
-                        contrasena = it
+                        viewModel.contrasena = it
                         viewModel.contrasenaValidationError = viewModel.validatePassword(it)
-                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(confirmarContrasena, it)
+                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(viewModel.confirmarContrasena, it)
                     },
                     label = { Text("Contraseña") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
                     isError = viewModel.contrasenaValidationError != null,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,14 +142,23 @@ fun RegistroVent8ScreenContent(
                     Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
                 }
 
+                // Confirmar Contraseña
                 OutlinedTextField(
-                    value = confirmarContrasena,
+                    value = viewModel.confirmarContrasena,
                     onValueChange = {
-                        confirmarContrasena = it
-                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(contrasena, it)
+                        viewModel.confirmarContrasena = it
+                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(viewModel.contrasena, it)
                     },
                     label = { Text("Confirmar Contraseña") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(
+                                imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
                     isError = viewModel.confirmarContrasenaValidationError != null,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,52 +167,33 @@ fun RegistroVent8ScreenContent(
                 viewModel.confirmarContrasenaValidationError?.let {
                     Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
                 }
-            }
 
-            Button(
-                onClick = {
-                    // Validar todo
-                    viewModel.nombreValidationError = viewModel.validateNombre(nombre)
-                    viewModel.correoValidationError = viewModel.validateEmail(correo)
-                    viewModel.contrasenaValidationError = viewModel.validatePassword(contrasena)
-                    viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(contrasena, confirmarContrasena)
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    if (
-                        viewModel.nombreValidationError != null ||
-                        viewModel.correoValidationError != null ||
-                        viewModel.contrasenaValidationError != null ||
-                        viewModel.confirmarContrasenaValidationError != null
-                    ) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Por favor corrige los errores antes de continuar")
-                        }
-                        return@Button
-                    }
-
-                    viewModel.nombre = nombre
-                    viewModel.correo = correo
-                    viewModel.contrasena = contrasena
-
-                    viewModel.registrarUsuario { success ->
-                        if (success) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Usuario registrado exitosamente")
+                Button(
+                    onClick = {
+                        if (!viewModel.cargando) {
+                            viewModel.registrarUsuario { success ->
+                                if (success) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Usuario registrado exitosamente")
+                                        onClick()
+                                    }
+                                }
                             }
-                            onClick()
                         }
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text("Registrarse")
+                    },
+                    enabled = !viewModel.cargando,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text("Registrarse")
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

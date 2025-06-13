@@ -29,7 +29,7 @@ fun AppNavigation(navController: NavHostController, viewModel: UsuarioViewModel)
         composable("registro4") { RegistroVent4Screen(navController, viewModel) }
         composable("registro5") { RegistroVent5Screen(navController, viewModel) }
         composable("registro6") { RegistroVent6Screen(navController) }
-        composable("registro7") { RegistroVent7Screen(navController) }
+        composable("registro7") { RegistroVent7Screen(navController, viewModel) }
         composable("registro8") { RegistroVent8Screen(navController, viewModel) }
         composable("inicio") { InicioScreen(navController) }
         composable("login") { LoginScreen(navController) }

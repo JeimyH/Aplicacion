@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.Alimento
-import com.example.frontendproyectoapp.model.RegistroAlimento
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
@@ -27,6 +26,8 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         private set
     var busqueda by mutableStateOf("")
     var idUsuario: Long? = null
+
+    var alimentosAgrupados by mutableStateOf<Map<String, List<Alimento>>>(emptyMap())
 
     init {
         viewModelScope.launch {
@@ -72,7 +73,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-
     fun cargarDatos() {
         viewModelScope.launch {
             try {
@@ -115,7 +115,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-
     fun cargarComidasRecientes() {
         viewModelScope.launch {
             try {
@@ -128,7 +127,40 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
+    fun cargarAlimentosAgrupados() {
+        viewModelScope.launch {
+            try {
+                idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+
+                val categorias = listOf(
+                    "Fruta", "Vegetal", "Pescado","Carne", "Proteína vegetal",
+                    "Grasa", "Cereal","Lácteo", "Dulce", "Fruto seco", "Semilla"
+                )
+
+                val agrupados = mutableMapOf<String, List<Alimento>>()
+
+                for (categoria in categorias) {
+                    try {
+                        val alimentos = repository.obtenerAlimentosPorCategoria(categoria)
+                        if (alimentos.isNotEmpty()) {
+                            agrupados[categoria] = alimentos
+                        }
+                    } catch (e: Exception) {
+                        Log.e("BuscarVM", "Error cargando categoría $categoria: ${e.message}")
+                    }
+                }
+
+                alimentosAgrupados = agrupados
+
+                // Favoritos actuales del usuario (si ya existe)
+                idUsuario?.let {
+                    favoritos = repository.obtenerFavoritos(it)
+                }
+
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error general al cargar alimentos: ${e.message}")
+            }
+        }
+    }
 }
-
-
-

@@ -12,6 +12,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface AlimentoService {
     @GET("/api/Alimento/listar")
@@ -55,6 +56,10 @@ interface AlimentoService {
         @Path("idUsuario") idUsuario: Long,
         @Path("idAlimento") idAlimento: Long
     )
+
+    @GET("/api/Alimento/imagen")
+    suspend fun obtenerUrlImagenPorNombre(@Query("nombre") nombre: String): String
+
 }
 
 object RetrofitClientAlimento {

@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -32,15 +34,21 @@ fun LoginScreen(
     val viewModel: LoginViewModel = viewModel(
         factory = LoginViewModelFactory(context.applicationContext as Application)
     )
-    val uiState by viewModel.uiState
 
     LoginScreenContent(
-        onLoginClick = { correo, password ->
-            viewModel.login(correo, password)
+        viewModel = viewModel,
+        onLoginClick = {
+            // Solo intenta loguear si el correo es válido
+            val correoValido = viewModel.validateCorreo(viewModel.correo) == null
+            if (correoValido) {
+                viewModel.login(viewModel.correo, viewModel.contrasena)
+            }
         },
-        onBackClick = { navController.popBackStack() },
-        uiState = uiState,
+        onBackClick = {
+            navController.popBackStack()
+        },
         onSuccess = {
+            // Navega a la pantalla de inicio si el login fue exitoso
             navController.navigate("inicio") {
                 popUpTo("login") { inclusive = true }
             }
@@ -49,35 +57,35 @@ fun LoginScreen(
     )
 }
 
+
 @Composable
 fun LoginScreenContent(
-    onLoginClick: (String, String) -> Unit = { _, _ -> },
+    viewModel: LoginViewModel,
+    onLoginClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    uiState: LoginUiState = LoginUiState.Idle,
     onSuccess: () -> Unit = {}
 ) {
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    /*
-    LaunchedEffect(uiState) {
-        if (uiState is LoginUiState.Success) {
-            onSuccess()
-        }
-    }
-    */
+    val uiState by viewModel.uiState
 
-    LaunchedEffect(uiState) {
-        if (uiState is LoginUiState.Success) {
-            onSuccess()
-        } else if (uiState is LoginUiState.Error) {
-            snackbarHostState.showSnackbar(
-                message = uiState.message,
-                duration = SnackbarDuration.Short
-            )
+    val correo by remember { derivedStateOf { viewModel.correo } }
+    val contrasena by remember { derivedStateOf { viewModel.contrasena } }
+    val correoValidationError by remember { derivedStateOf { viewModel.correoValidationError } }
+
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel.uiState.value) {
+        when (val state = viewModel.uiState.value) {
+            is LoginUiState.Success -> onSuccess()
+            is LoginUiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = state.message, // <-- Aquí se hace cast explícito
+                    duration = SnackbarDuration.Short
+                )
+            }
+            else -> {}
         }
     }
 
@@ -115,8 +123,9 @@ fun LoginScreenContent(
 
             OutlinedTextField(
                 value = correo,
-                onValueChange = { correo = it },
+                onValueChange = { viewModel.onCorreoChanged(it) },
                 label = { Text("Correo") },
+                isError = correoValidationError != null,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Email,
@@ -127,17 +136,31 @@ fun LoginScreenContent(
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(20.dp)
             )
+            if (correoValidationError != null) {
+                Text(
+                    text = correoValidationError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
 
             OutlinedTextField(
                 value = contrasena,
-                onValueChange = { contrasena = it },
+                onValueChange = { viewModel.onContrasenaChanged(it) },
                 label = { Text("Contraseña") },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
                 ),
+                trailingIcon = {
+                    val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = icon, contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña")
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -149,15 +172,12 @@ fun LoginScreenContent(
             Button(
                 enabled = uiState != LoginUiState.Loading,
                 onClick = {
-                    if (correo.isNotBlank() && contrasena.isNotBlank() &&
-                        android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()
-                    ) {
-                        onLoginClick(correo, contrasena)
+                    if (correoValidationError == null) {
+                        onLoginClick()
                     } else {
-                        println("Mostrando Snackbar de error")
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar(
-                                message = "Por favor, ingresa un correo y contraseña válidos.",
+                                message = "Por favor, ingresa un correo válido.",
                                 duration = SnackbarDuration.Short
                             )
                         }
@@ -179,15 +199,24 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = { /* Navegar a recuperación o registro */ }) {
+            TextButton(onClick = {
+                // Aquí puedes navegar a una pantalla de recuperación de contraseña
+            }) {
                 Text("¿Olvidaste tu contraseña?")
             }
         }
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreenContent()
+    // Muestra contenido sin ViewModel (modo preview)
+    LoginScreenContent(
+        viewModel = object : LoginViewModel(Application()) {
+            override val uiState: State<LoginUiState> = mutableStateOf(LoginUiState.Idle)
+        }
+    )
 }
+ */

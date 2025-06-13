@@ -1,11 +1,9 @@
 package com.example.frontendproyectoapp.viewModel
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
@@ -20,21 +18,51 @@ sealed class LoginUiState {
 }
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
+
     private val context = application.applicationContext
     private val repositoryUsuario = UsuarioRepository()
 
     private val _uiState = mutableStateOf<LoginUiState>(LoginUiState.Idle)
     val uiState: State<LoginUiState> = _uiState
 
+    var correo by mutableStateOf("")
+        private set
+
+    var contrasena by mutableStateOf("")
+        private set
+
+    var correoValidationError by mutableStateOf<String?>(null)
+
+    private val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
+
+    fun onCorreoChanged(value: String) {
+        correo = value
+        correoValidationError = validateCorreo(value)
+        Log.d("LoginViewModel", "Correo cambiado: $correo")
+    }
+
+    fun onContrasenaChanged(value: String) {
+        contrasena = value
+        Log.d("LoginViewModel", "Contraseña cambiada")
+    }
+
+    fun validateCorreo(correo: String): String? {
+        return when {
+            correo.isBlank() -> "El correo no puede estar vacío"
+            !emailRegex.matches(correo) -> "Correo no válido"
+            else -> null
+        }
+    }
+
     fun login(correo: String, contrasena: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
+            Log.d("LoginViewModel", "Intentando login con: $correo")
 
             val result = repositoryUsuario.login(correo, contrasena)
 
             result.fold(
                 onSuccess = { usuario ->
-                    // Guardar el ID de forma secuencial y segura
                     UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
                     Log.d("LoginViewModel", "ID de usuario guardado: ${usuario.idUsuario}")
                     _uiState.value = LoginUiState.Success(usuario)
@@ -45,14 +73,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         "Respuesta vacía" -> "Error en el servidor. Inténtalo de nuevo más tarde."
                         else -> "Ocurrió un error durante el inicio de sesión. Inténtalo de nuevo."
                     }
+                    Log.e("LoginViewModel", "Login fallido: ${it.message}")
                     _uiState.value = LoginUiState.Error(errorMessage)
                 }
             )
         }
     }
 
-
     fun resetState() {
         _uiState.value = LoginUiState.Idle
+        Log.d("LoginViewModel", "Estado del login reseteado")
     }
 }

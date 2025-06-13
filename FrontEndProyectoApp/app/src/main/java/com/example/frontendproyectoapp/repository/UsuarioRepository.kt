@@ -5,11 +5,6 @@ import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
-import kotlinx.coroutines.suspendCancellableCoroutine
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import kotlin.coroutines.resume
 
 class UsuarioRepository {
     suspend fun obtenerUsuarios(): List<Usuario> {
@@ -50,51 +45,31 @@ class UsuarioRepository {
     }
 
     suspend fun registrarUsuario(usuario: UsuarioEntrada): Result<UsuarioRespuesta> {
-        return suspendCancellableCoroutine { continuation ->
-            val call = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
-
-            call.enqueue(object : Callback<UsuarioRespuesta> {
-                override fun onResponse(call: Call<UsuarioRespuesta>, response: Response<UsuarioRespuesta>) {
-                    if (response.isSuccessful) {
-                        val body = response.body()
-                        if (body != null) {
-                            continuation.resume(Result.success(body))
-                        } else {
-                            continuation.resume(Result.failure(Exception("Respuesta vacía")))
-                        }
-                    } else {
-                        continuation.resume(Result.failure(Exception("Error: ${response.code()}")))
-                    }
-                }
-
-                override fun onFailure(call: Call<UsuarioRespuesta>, t: Throwable) {
-                    continuation.resume(Result.failure(t))
-                }
-            })
-
-            // Para cancelar la petición si la corrutina es cancelada
-            continuation.invokeOnCancellation {
-                call.cancel()
+        return try {
+            val response = RetrofitClientUsuario.usuarioService.registrarUsuario(usuario)
+            if (response.isSuccessful) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error ${response.code()}: ${response.message()}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    suspend fun verificarNombre(nombre: String): Boolean {
+    suspend fun existeNombre(nombre: String): Boolean {
         return try {
-            RetrofitClientUsuario.usuarioService.verificarNombre(nombre).isDisponible.not()
+            RetrofitClientUsuario.usuarioService.verificarNombreExistente(nombre)
         } catch (e: Exception) {
             false
         }
     }
 
-    suspend fun verificarCorreo(correo: String): Boolean {
+    suspend fun existeCorreo(correo: String): Boolean {
         return try {
-            RetrofitClientUsuario.usuarioService.verificarCorreo(correo).isDisponible.not()
+            RetrofitClientUsuario.usuarioService.verificarCorreoExistente(correo)
         } catch (e: Exception) {
             false
         }
     }
-
-
-
 }

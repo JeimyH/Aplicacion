@@ -1,13 +1,11 @@
 package com.example.frontendproyectoapp.interfaces
 
-import com.example.frontendproyectoapp.model.DisponibilidadResponse
 import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -38,14 +36,14 @@ interface UsuarioService {
     @POST("/api/Usuario/login")
     suspend fun login(@Body login: Login): Response<UsuarioRespuesta>
 
-    @POST("/api/Usuario/registrar")
-    fun registrarUsuario(@Body usuario: UsuarioEntrada): Call<UsuarioRespuesta>  // o Call<UsuarioRespuestaDTO> si quieres usar la respuesta
+    @POST("api/Usuario/registrar")
+    suspend fun registrarUsuario(@Body usuario: UsuarioEntrada): Response<UsuarioRespuesta>
 
-    @GET("usuarios/disponible/nombre")
-    suspend fun verificarNombre(@Query("nombre") nombre: String): DisponibilidadResponse
+    @GET("/api/Usuario/existeCorreo")
+    suspend fun verificarCorreoExistente(@Query("correo") correo: String): Boolean
 
-    @GET("usuarios/disponible/correo")
-    suspend fun verificarCorreo(@Query("correo") correo: String): DisponibilidadResponse
+    @GET("/api/Usuario/existeNombre")
+    suspend fun verificarNombreExistente(@Query("nombre") nombre: String): Boolean
 
 }
 
