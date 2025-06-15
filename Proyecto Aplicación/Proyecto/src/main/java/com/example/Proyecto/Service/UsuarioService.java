@@ -118,45 +118,28 @@ public class UsuarioService {
         }
     }
 
-    /*public Usuario obtenerPorCorreo(@Param("correo") String correo){
-        return usuarioRepository.findByCorreo(correo);
-    }
-
-     */
-
-    public Usuario obtenerLogin(@Param("correo") String correo, @Param("contrasena") String contrasena){
-        return usuarioRepository.validateLogin(correo,contrasena);
-    }
-
-    /*public Usuario registrarUsuario(Usuario usuario) {
-        // Cifrar la contraseña antes de guardar
-        String contrasenaCifrada = passwordEncoder.encode(usuario.getContrasena());
-        usuario.setContrasena(contrasenaCifrada);
-        return usuarioRepository.save(usuario);
-    }
-
-     */
-
-    public Usuario registrarUsuario(UsuarioEntradaDTO entradaDTO) {
-        if (usuarioRepository.existsByCorreo(entradaDTO.getCorreo())) {
+    public Usuario registrarUsuario(UsuarioEntradaDTO dto) {
+        if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
             throw new IllegalArgumentException("El correo ya está registrado");
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setCorreo(entradaDTO.getCorreo());
-        usuario.setContrasena(passwordEncoder.encode(entradaDTO.getContrasena()));
-        usuario.setNombre(entradaDTO.getNombre());
-        usuario.setFechaNacimiento(entradaDTO.getFechaNacimiento());
-        usuario.setAltura(entradaDTO.getAltura());
-        usuario.setPeso(entradaDTO.getPeso());
-        usuario.setSexo(entradaDTO.getSexo());
-        usuario.setRestriccionesDieta(entradaDTO.getRestriccionesDieta());
-        usuario.setObjetivosSalud(entradaDTO.getObjetivosSalud());
-        usuario.setPesoObjetivo(entradaDTO.getPesoObjetivo());
-        usuario.setCreadoEn(new Timestamp(System.currentTimeMillis()));
-        //usuario.setActualizadoEn(new Timestamp(System.currentTimeMillis()));
+        if (usuarioRepository.existsByNombre(dto.getNombre())) {
+            throw new IllegalArgumentException("El nombre de usuario ya está en uso");
+        }
 
-        return usuarioRepository.save(usuario);
+        Usuario nuevo = new Usuario();
+        nuevo.setCorreo(dto.getCorreo());
+        nuevo.setContrasena(passwordEncoder.encode(dto.getContrasena()));
+        nuevo.setNombre(dto.getNombre());
+        nuevo.setFechaNacimiento(dto.getFechaNacimiento());
+        nuevo.setAltura(dto.getAltura());
+        nuevo.setPeso(dto.getPeso());
+        nuevo.setSexo(dto.getSexo());
+        nuevo.setObjetivosSalud(dto.getObjetivosSalud());
+        nuevo.setRestriccionesDieta(dto.getRestriccionesDieta());
+        nuevo.setCreadoEn(new Timestamp(System.currentTimeMillis()));
+
+        return usuarioRepository.save(nuevo);
     }
 
 
@@ -177,12 +160,6 @@ public class UsuarioService {
     public PreferenciasUsuario obtenerPreferenciasPorUsuarioId(@Param("id_usuario") Integer id_usuario){
         return usuarioRepository.findPreferenciasByUsuarioId(id_usuario);
     }
-
-    /*public int siExisteCorreo(@Param("correo") String correo){
-        return usuarioRepository.existsByCorreo(correo);
-    }
-
-     */
 
     public PreferenciasUsuario obtenerPreferenciasYRestriccionesPorUsuarioId(@Param("id_usuario") Integer id_usuario){
         return usuarioRepository.findPreferenciasAndRestriccionesByUsuarioId(id_usuario);

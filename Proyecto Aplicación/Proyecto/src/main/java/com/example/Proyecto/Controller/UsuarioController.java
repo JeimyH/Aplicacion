@@ -10,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/Usuario")
@@ -90,16 +88,34 @@ public class UsuarioController {
         return respuesta;
     }
 
+    @GetMapping("/existeCorreo")
+    public ResponseEntity<Boolean> existeCorreo(@RequestParam String correo) {
+        boolean existe = usuarioService.usuarioRepository.existsByCorreo(correo);
+        return new ResponseEntity<>(existe, HttpStatus.OK);
+    }
+
+    @GetMapping("/existeNombre")
+    public ResponseEntity<Boolean> existeNombre(@RequestParam String nombre) {
+        boolean existe = usuarioService.usuarioRepository.existsByNombre(nombre);
+        return new ResponseEntity<>(existe, HttpStatus.OK);
+    }
+
     @PostMapping("/registrar")
-    public ResponseEntity<UsuarioRespuestaDTO> registrarUsuario(@RequestBody UsuarioEntradaDTO entradaDTO) {
+    public ResponseEntity<?> registrarUsuario(@RequestBody UsuarioEntradaDTO entradaDTO) {
         try {
             Usuario nuevoUsuario = usuarioService.registrarUsuario(entradaDTO);
             UsuarioRespuestaDTO respuesta = mapToResponse(nuevoUsuario);
             return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            // Devuelve un mensaje claro al frontend
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", e.getMessage());
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", "Error inesperado al registrar usuario");
+            return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

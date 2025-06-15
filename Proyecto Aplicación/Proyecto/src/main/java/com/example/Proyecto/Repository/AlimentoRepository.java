@@ -31,4 +31,7 @@ public interface AlimentoRepository extends JpaRepository<Alimento, Long> {
 
     List<Alimento> findByNombreAlimentoContainingIgnoreCase(String nombre);
     List<Alimento> findByCategoria(String categoria);
+
+    @Query(value = "SELECT url_imagen FROM Alimento WHERE nombre_alimento = :nombre LIMIT 1", nativeQuery = true)
+    String encontrarUrlImagenPorNombre(@Param("nombre") String nombre);
 }

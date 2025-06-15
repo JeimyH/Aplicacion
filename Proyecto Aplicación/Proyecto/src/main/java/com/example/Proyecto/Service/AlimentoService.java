@@ -5,7 +5,6 @@ import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Model.UsuarioAlimentoFavorito;
 import com.example.Proyecto.Model.UsuarioAlimentoKey;
 import com.example.Proyecto.Repository.AlimentoRepository;
-import com.example.Proyecto.Repository.RegistroAlimentoRepository;
 import com.example.Proyecto.Repository.UsuarioAlimentoFavoritoRepository;
 import com.example.Proyecto.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,26 +109,6 @@ public class AlimentoService {
             throw new RuntimeException("Error al eliminar el alimento "+ idAlimento +": "+ e.getMessage(), e);
         }
     }
-/*
-    public Alimento actualizarAlimento(long idAlimento, Alimento alimentoActualizado){
-        return alimentoRepository.findById(idAlimento).map(alimentoExistente -> {
-            alimentoExistente.setNombreAlimento(alimentoActualizado.getNombreAlimento());
-            alimentoExistente.setCalorias(alimentoActualizado.getCalorias());
-            alimentoExistente.setProteinas(alimentoActualizado.getProteinas());
-            alimentoExistente.setCarbohidratos(alimentoActualizado.getCarbohidratos());
-            alimentoExistente.setGrasas(alimentoActualizado.getGrasas());
-            alimentoExistente.setAzucares(alimentoActualizado.getAzucares());
-            alimentoExistente.setFibra(alimentoActualizado.getFibra());
-            alimentoExistente.setSodio(alimentoActualizado.getSodio());
-            alimentoExistente.setGrasasSaturadas(alimentoActualizado.getGrasasSaturadas());
-            alimentoExistente.setCategoria(alimentoActualizado.getCategoria());
-            alimentoExistente.setUrlImagen(alimentoActualizado.getUrlImagen());
-            alimentoExistente.setCantidadBase(alimentoActualizado.getCantidadBase());
-            alimentoExistente.setUnidadBase(alimentoActualizado.getUnidadBase());
-            return alimentoRepository.save(alimentoExistente);
-        }).orElseThrow(() -> new NoSuchElementException("Alimento no encontrado con ID: " + idAlimento));
-    }
- */
 
     public Alimento actualizarAlimento(long idAlimento, Alimento alimentoActualizado){
         Optional<Alimento> alimentoOpt = alimentoRepository.findById(idAlimento);
@@ -223,4 +202,7 @@ public class AlimentoService {
                 .collect(Collectors.toList());
     }
 
+    public String obtenerUrlImagenPorNombre(String nombreAlimento) {
+        return alimentoRepository.encontrarUrlImagenPorNombre(nombreAlimento);
+    }
 }

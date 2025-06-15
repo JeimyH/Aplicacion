@@ -135,4 +135,14 @@ public class AlimentoController {
     public ResponseEntity<List<Alimento>> obtenerFavoritos(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(alimentoService.obtenerFavoritos(idUsuario));
     }
+
+    @GetMapping("/imagen")
+    public ResponseEntity<String> obtenerUrlImagenPorNombre(@RequestParam("nombre") String nombreAlimento) {
+        String urlImagen = alimentoService.obtenerUrlImagenPorNombre(nombreAlimento);
+        if (urlImagen != null) {
+            return ResponseEntity.ok(urlImagen);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

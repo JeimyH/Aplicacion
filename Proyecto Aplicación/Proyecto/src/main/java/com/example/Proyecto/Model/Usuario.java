@@ -82,11 +82,6 @@ public class Usuario {
     @JsonIgnore
     private List<RutinaAlimenticiaIA> rutinaAlimenticiaIAS;
 
-    /*
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Alimento> alimentos;
-     */
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<EstadisticasNutricionales> estadisticasNutricionales;

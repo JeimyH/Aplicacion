@@ -18,4 +18,6 @@ public class ProyectoApplication {
 		System.setProperty("BD_USERNAME", dotenv.get("BD_USERNAME"));
 		System.setProperty("BD_PASSWORD", dotenv.get("BD_PASSWORD"));
 	}
+
+
 }

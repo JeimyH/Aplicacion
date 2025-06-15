@@ -18,8 +18,8 @@ public class UsuarioRespuestaDTO {
     private String correo;
     private String nombre;
     private LocalDate fechaNacimiento;
-    private double altura;
-    private double peso;
+    private Float altura;
+    private Float peso;
     private String sexo;
     private String restriccionesDieta;
     private String objetivosSalud;
