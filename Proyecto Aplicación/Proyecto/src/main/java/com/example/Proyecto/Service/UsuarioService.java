@@ -141,8 +141,7 @@ public class UsuarioService {
 
         return usuarioRepository.save(nuevo);
     }
-
-
+    
     public Usuario autenticar(String correo, String contrasena) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findByCorreo(correo);
 
