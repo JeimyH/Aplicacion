@@ -1,7 +1,6 @@
 package com.example.frontendproyectoapp.interfaces
 
 import com.example.frontendproyectoapp.model.Login
-import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
 import okhttp3.Credentials
@@ -10,28 +9,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UsuarioService {
-    @GET("/api/Usuario/listar")
-    suspend fun listarUsuario(): List<Usuario>
-
-    @GET("/api/Usuario/buscar/{idUsuario}")
-    suspend fun listarPorIdUsuario(@Path("idUsuario") idUsuario: Long): Usuario
-
-    @POST("/api/Usuario/guardar")
-    suspend fun guardarUsuario(@Body usuario: Usuario): Usuario
-
-    @DELETE("/api/Usuario/eliminar/{idUsuario}")
-    suspend fun eliminarUsuario(@Path("idUsuario") idUsuario: Long)
-
-    @PUT("/api/Usuario/actualizar/{idUsuario}")
-    suspend fun actualizarUsuario(@Path("idUsuario") idUsuario: Long, @Body usuario: Usuario): Usuario
 
     @POST("/api/Usuario/login")
     suspend fun login(@Body login: Login): Response<UsuarioRespuesta>

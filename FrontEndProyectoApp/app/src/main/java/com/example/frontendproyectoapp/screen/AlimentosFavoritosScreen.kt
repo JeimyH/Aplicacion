@@ -2,6 +2,8 @@ package com.example.frontendproyectoapp.screen
 
 import android.app.Application
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -51,16 +53,18 @@ fun AlimentosFavoritosScreenContent(viewModel: BuscarAlimentoViewModel, navContr
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
             if (viewModel.favoritos.isEmpty()) {
-                Text("No tienes alimentos favoritos aún.")
+                item {
+                    Text("No tienes alimentos favoritos aún.")
+                }
             } else {
-                viewModel.favoritos.forEach { alimento ->
+                items(viewModel.favoritos) { alimento ->
                     AlimentoItem(
                         alimento = alimento,
                         esFavorito = true,
@@ -77,6 +81,7 @@ fun AlimentosFavoritosScreenContent(viewModel: BuscarAlimentoViewModel, navContr
                 }
             }
         }
+
     }
 }
 

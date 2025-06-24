@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.mediation.test.suite)
+    implementation(libs.androidx.foundation.android)
 
     // Testing
     testImplementation(libs.junit)

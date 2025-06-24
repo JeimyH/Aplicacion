@@ -31,7 +31,7 @@ public class RegistroAlimento {
     private String momentoDelDia;
 
     @Column(name = "Consumido_En", nullable = false)
-    private LocalDateTime consumidoEn;  // fecha de consumo del alimento
+    private LocalDateTime consumidoEn;  // fecha de consulta del alimento
 
     //Relaciones entre tablas
     @ManyToOne
@@ -41,7 +41,7 @@ public class RegistroAlimento {
 
     @ManyToOne
     @JoinColumn(name="id_alimento", nullable = false)
-    @JsonIgnore
+    //@JsonIgnore
     private Alimento alimento;
 
 }

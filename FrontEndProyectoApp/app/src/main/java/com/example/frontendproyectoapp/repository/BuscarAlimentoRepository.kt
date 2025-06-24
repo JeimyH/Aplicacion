@@ -1,12 +1,16 @@
 package com.example.frontendproyectoapp.repository
 
 import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
+import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimentoReciente
 import com.example.frontendproyectoapp.interfaces.RetrofitClientRegistroAlimento
 import com.example.frontendproyectoapp.model.Alimento
+import com.example.frontendproyectoapp.model.AlimentoReciente
+import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
+import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 
 class BuscarAlimentoRepository {
     private val alimentoService = RetrofitClientAlimento.alimentoService
-    private val registroService = RetrofitClientRegistroAlimento.registroAlimentoService
+    private val recienteService = RetrofitClientAlimentoReciente.alimentoRecienteService
 
     suspend fun obtenerTodos(): List<Alimento> = alimentoService.listarAlimentos()
 
@@ -16,22 +20,35 @@ class BuscarAlimentoRepository {
     suspend fun obtenerFavoritos(idUsuario: Long): List<Alimento> =
         alimentoService.obtenerFavoritos(idUsuario)
 
-    suspend fun marcarFavorito(idUsuario: Long, idAlimento: Long) {
-        alimentoService.marcarFavorito(idUsuario, idAlimento)
-    }
-
-    suspend fun eliminarFavorito(idUsuario: Long, idAlimento: Long) {
-        alimentoService.eliminarFavorito(idUsuario, idAlimento)
-    }
-
-    suspend fun obtenerUrlImagen(nombre: String): String? =
-        try {
-            alimentoService.obtenerUrlImagenPorNombre(nombre)
-        } catch (e: Exception) {
-            null
-        }
-
     suspend fun obtenerAlimentosPorCategoria(categoria: String): List<Alimento> =
         alimentoService.obtenerAlimentosPorCategoria(categoria)
+
+    suspend fun registrarAlimentoReciente(idUsuario: Long, idAlimento: Long): Boolean {
+        val response = recienteService.registrarReciente(idUsuario, idAlimento)
+        return response.isSuccessful
+    }
+
+    suspend fun obtenerAlimentosRecientes(idUsuario: Long): List<AlimentoReciente> {
+        return recienteService.obtenerRecientes(idUsuario)
+    }
+
+    suspend fun eliminarTodosRecientes(idUsuario: Long) {
+        recienteService.eliminarTodos(idUsuario)
+    }
+
+    suspend fun eliminarRecienteIndividual(idUsuario: Long, idAlimento: Long) {
+        val response = recienteService.eliminarRecienteIndividual(idUsuario, idAlimento)
+        if (!response.isSuccessful) {
+            throw Exception("Error al eliminar alimento reciente")
+        }
+    }
+
+    suspend fun guardarRegistro(registro: RegistroAlimentoEntrada) {
+        RetrofitClientRegistroAlimento.registroAlimentoService.guardarRegistro(registro)
+    }
+
+    suspend fun obtenerComidasRecientes(idUsuario: Long): List<RegistroAlimentoSalida> {
+        return RetrofitClientRegistroAlimento.registroAlimentoService.obtenerComidasRecientes(idUsuario)
+    }
 
 }

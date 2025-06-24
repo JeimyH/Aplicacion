@@ -3,7 +3,6 @@ package com.example.Proyecto.Controller;
 import com.example.Proyecto.DTO.RegistroAguaEntradaDTO;
 import com.example.Proyecto.DTO.RegistroAguaRespuestaDTO;
 import com.example.Proyecto.Model.RegistroAgua;
-import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.UsuarioRepository;
 import com.example.Proyecto.Service.RegistroAguaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ import java.util.Optional;
 public class RegistroAguaController {
     @Autowired
     public RegistroAguaService registroAguaService;
-
-    @Autowired
-    public UsuarioRepository usuarioRepository;
 
     @GetMapping("/listar")
     public ResponseEntity<List<RegistroAgua>> listarRegistroAgua() {
@@ -84,7 +80,7 @@ public class RegistroAguaController {
         }
     }
 
-    @PostMapping("/{idUsuario}")
+    @PostMapping("/registrar/{idUsuario}")
     public ResponseEntity<RegistroAguaRespuestaDTO> registrarAgua(
             @PathVariable Long idUsuario,
             @RequestBody RegistroAguaEntradaDTO entrada) {
@@ -100,7 +96,7 @@ public class RegistroAguaController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/{idUsuario}/hoy")
+    @GetMapping("/obtener/{idUsuario}/hoy")
     public ResponseEntity<RegistroAguaRespuestaDTO> obtenerRegistroDeHoy(@PathVariable Long idUsuario) {
         RegistroAgua registro = registroAguaService.obtenerRegistroDeHoy(idUsuario);
         if (registro == null) {

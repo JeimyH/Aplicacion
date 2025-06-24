@@ -19,61 +19,6 @@ public class UsuarioController {
     @Autowired
     public UsuarioService usuarioService;
 
-    @GetMapping("/listar")
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
-        List<Usuario> usuarios = usuarioService.listarUsuarios();
-        // Verificar si la lista está vacía
-        if (usuarios.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-        }
-        return new ResponseEntity<>(usuarios, HttpStatus.OK); // 200 OK
-    }
-
-    @GetMapping("/buscar/{idUsuario}")
-    public ResponseEntity<Usuario> listarPorIdUsuario(@PathVariable long idUsuario){
-        try {
-            Optional<Usuario> usuarioOpt = usuarioService.listarPorIdUsuario(idUsuario);
-            return usuarioOpt.map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
-        }
-    }
-
-    @PostMapping("/guardar")
-    public ResponseEntity<Usuario> guardarUsuario(@RequestBody Usuario usuario){
-        try {
-            Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
-            return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED); // 201 Created
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
-        }
-    }
-
-    @DeleteMapping("/eliminar/{idUsuario}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable long idUsuario){
-        try {
-            usuarioService.eliminarUsuario(idUsuario);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
-        }
-    }
-
-    @PutMapping("/actualizar/{idUsuario}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable long idUsuario, @RequestBody Usuario usuarioActualizado){
-        try {
-            Usuario usuario = usuarioService.actualizarUsuario(idUsuario, usuarioActualizado);
-            return new ResponseEntity<>(usuario, HttpStatus.OK); // 200 OK
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
-        }
-    }
-
     private UsuarioRespuestaDTO mapToResponse(Usuario usuario) {
         UsuarioRespuestaDTO respuesta = new UsuarioRespuestaDTO();
         respuesta.setIdUsuario(usuario.getIdUsuario());

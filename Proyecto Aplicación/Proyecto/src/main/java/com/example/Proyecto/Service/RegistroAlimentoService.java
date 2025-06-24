@@ -1,6 +1,7 @@
 package com.example.Proyecto.Service;
 
 import com.example.Proyecto.DTO.RegistroAlimentoEntradaDTO;
+import com.example.Proyecto.DTO.RegistroPorFechaYMomentoDTO;
 import com.example.Proyecto.Model.Alimento;
 import com.example.Proyecto.Model.RegistroAlimento;
 import com.example.Proyecto.Model.Usuario;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -81,8 +83,10 @@ public class RegistroAlimentoService {
     }
 
     public List<RegistroAlimento> obtenerRecientesPorUsuario(Long idUsuario) {
-        return registroAlimentoRepository.findByUsuario_IdUsuarioOrderByConsumidoEnDesc(idUsuario);
+        return registroAlimentoRepository.findRecientesConAlimento(idUsuario);
     }
+
+
 
     public void eliminarRegistroAlimento(long idRegistroAlimento){
         try {
@@ -110,24 +114,13 @@ public class RegistroAlimentoService {
             return null;
         }
     }
-/*
-    public Map<String, List<RegistroAlimento>> obtenerRegistrosAgrupadosPorMomento(Long id_usuario, LocalDate fecha) {
-        try {
-            List<RegistroAlimento> registros = registroAlimentoRepository.findByUsuarioAndFecha(id_usuario, fecha);
 
-            if (registros == null || registros.isEmpty()) {
-                throw new IllegalStateException("No se encontraron registros para el usuario y fecha proporcionados.");
-            }
-
-            return registros.stream()
-                    .collect(Collectors.groupingBy(RegistroAlimento::getMomentoDelDia));
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al obtener registros agrupados por momento del día: " + e.getMessage(), e);
-        }
+    public List<RegistroAlimento> obtenerPorUsuarioFechaYMomento(Long idUsuario, LocalDate fecha, String momento) {
+        LocalDateTime inicio = fecha.atStartOfDay();
+        LocalDateTime fin = fecha.atTime(LocalTime.MAX);
+        return registroAlimentoRepository.findByUsuarioFechaYMomento(idUsuario, inicio, fin, momento);
     }
 
- */
 
 
 }

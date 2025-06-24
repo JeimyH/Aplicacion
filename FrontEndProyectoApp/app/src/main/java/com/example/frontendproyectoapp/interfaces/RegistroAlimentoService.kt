@@ -10,7 +10,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface RegistroAlimentoService {
     @POST("/api/RegistroAlimento/registro")
@@ -18,13 +17,6 @@ interface RegistroAlimentoService {
 
     @GET("/api/RegistroAlimento/recientes/{idUsuario}")
     suspend fun obtenerComidasRecientes(@Path("idUsuario") idUsuario: Long): List<RegistroAlimentoSalida>
-
-    @GET("/api/RegistroAlimento/agrupados/{idUsuario}")
-    suspend fun obtenerRegistrosAgrupadosPorMomento(
-        @Path("idUsuario") idUsuario: Long,
-        @Query("fecha") fecha: String // formato ISO yyyy-MM-dd
-    ): Map<String, List<RegistroAlimentoSalida>>
-
 
 }
 

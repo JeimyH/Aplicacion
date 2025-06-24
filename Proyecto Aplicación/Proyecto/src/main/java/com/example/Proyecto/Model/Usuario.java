@@ -106,6 +106,10 @@ public class Usuario {
     @JsonIgnore
     private List<ModificacionRutinaChatbot> modificacionRutinaChatbots;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<AlimentoReciente> alimentosRecientes;
+
     // Uno a Uno
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore

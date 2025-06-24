@@ -1,187 +1,123 @@
 package com.example.frontendproyectoapp.screen
 
-import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.frontendproyectoapp.model.Alimento
-import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModel
-import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModelFactory
-import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
+import coil.request.ImageRequest
 
 @Composable
-fun RegistroVent7Screen(navController: NavController, usuarioViewModel: UsuarioViewModel) {
-    val context = LocalContext.current
-    val viewModel: BuscarAlimentoViewModel = viewModel(
-        factory = BuscarAlimentoViewModelFactory(context.applicationContext as Application)
-    )
-
-    LaunchedEffect(Unit) {
-        viewModel.cargarAlimentosAgrupados()
-    }
-
+fun RegistroVent7Screen(navController: NavController) {
     RegistroVent7ScreenContent(
-        buscarViewModel = viewModel,
-        usuarioViewModel = usuarioViewModel,
         onBackClick = { navController.popBackStack() },
-        onContinueClick = { navController.navigate("registro8") }
+        onClick = { navController.navigate("registro8") }
     )
 }
 
 @Composable
 fun RegistroVent7ScreenContent(
-    buscarViewModel: BuscarAlimentoViewModel,
-    usuarioViewModel: UsuarioViewModel,
     onBackClick: () -> Unit = {},
-    onContinueClick: () -> Unit = {}
+    onClick: () -> Unit = {}
 ) {
-    val alimentosAgrupados = buscarViewModel.alimentosAgrupados
-    val seleccionados = usuarioViewModel.alimentosFavoritos
+    val context = LocalContext.current
 
-    Column(
+    val imagePainter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(context)
+            .data("https://drive.google.com/uc?export=view&id=1g0Ky2WqSbPYZdp0Ee0hcg0uvSPJ97-Lr") // Reemplaza con URL válida
+            .crossfade(true)
+            .listener(
+                onSuccess = { _, _ ->
+                    Log.d("RegistroVent6Screen", "Imagen cargada correctamente.")
+                },
+                onError = { _, result ->
+                    Log.e("RegistroVent6Screen", "Error al cargar imagen: ${result.throwable}")
+                }
+            )
+            .build()
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
-        IconButton(onClick = onBackClick) {
+        // Botón atrás en la parte superior izquierda
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier.align(Alignment.TopStart)
+        ) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver")
         }
 
-        Text(
-            text = "Selecciona tus alimentos más consumidos",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
+        // Contenido centrado
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Imagen redondeada y centrada
+            Image(
+                painter = imagePainter,
+                contentDescription = "Logo Screen6",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(340.dp) // Imagen más grande y cuadrada
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            )
 
-        if (alimentosAgrupados.isEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("No se encontraron alimentos para mostrar.", color = Color.Red)
-        }
+            Spacer(modifier = Modifier.height(24.dp)) // Menor espacio con texto
 
-        alimentosAgrupados.forEach { (categoria, alimentos) ->
-            CategoriaAlimentosComposable(
-                titulo = categoria,
-                alimentos = alimentos,
-                seleccionados = seleccionados,
-                onToggle = { usuarioViewModel.toggleFavorito(it) }
+            Text(
+                text = "Continuemos, ahora personalizaremos tu rutina de comidas para alcanzar tus calorías diarias",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
+        // Botón continuar anclado en la parte inferior
         Button(
-            onClick = onContinueClick,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            onClick = onClick,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
         ) {
             Text("Continuar")
         }
     }
 }
 
-@Composable
-fun CategoriaAlimentosComposable(
-    titulo: String,
-    alimentos: List<Alimento>,
-    seleccionados: List<Alimento>,
-    onToggle: (Alimento) -> Unit
-) {
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        Text(
-            text = titulo,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
-        )
 
-        val filas = alimentos.chunked(3)
-        filas.forEach { fila ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                fila.forEach { alimento ->
-                    AlimentoItemUrl(
-                        alimento = alimento,
-                        esSeleccionado = seleccionados.any { it.idAlimento == alimento.idAlimento },
-                        onToggle = { onToggle(alimento) }
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
 
-@Composable
-fun AlimentoItemUrl(
-    alimento: Alimento,
-    esSeleccionado: Boolean,
-    onToggle: () -> Unit
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .clickable { onToggle() }
-                .border(2.dp, if (esSeleccionado) Color.Green else Color.LightGray, CircleShape)
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = alimento.urlImagen ?: "https://via.placeholder.com/100"
-                ),
-                contentDescription = alimento.nombreAlimento,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = alimento.nombreAlimento,
-            fontSize = 12.sp,
-            fontWeight = if (esSeleccionado) FontWeight.Bold else FontWeight.Normal
-        )
-    }
-}
-
-/*
 @Preview(showBackground = true)
 @Composable
 fun RegistroVent7ScreenPreview() {
     RegistroVent7ScreenContent()
 }
-
- */

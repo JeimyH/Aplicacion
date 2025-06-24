@@ -13,7 +13,6 @@ import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.repository.UsuarioRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
@@ -55,33 +54,6 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
 
     //Variable para guardar temporalmente los alimentos hasta que se registre un usuario y se puedan guardar los alimentos
     val alimentosFavoritos = mutableStateListOf<Alimento>()
-
-    fun obtenerUsuarios() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val usuariosList = repositoryUsuario.obtenerUsuarios()
-            _usuarios.postValue(usuariosList)
-        }
-    }
-
-    fun obtenerUsuario(idUsuario: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repositoryUsuario.obtenerIdUsuario(idUsuario)
-        }
-    }
-
-    fun guardarUsuario(usuario: Usuario) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repositoryUsuario.guardarUsuario(usuario)
-            obtenerUsuarios()
-        }
-    }
-
-    fun eliminarUsuario(idUsuario: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repositoryUsuario.eliminarUsuario(idUsuario)
-            obtenerUsuarios()
-        }
-    }
 
     fun validateNombre(nombre: String): String? {
         return if (nombre.isBlank()) "El nombre no puede estar vacío" else null
@@ -194,30 +166,6 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             )
         }
     }
-
-    // Metodos para Guardar los alimentos seleccionados hasta que se registre el usuario
-/*
-    fun agregarFavorito(alimento: Alimento) {
-        if (!alimentosFavoritos.any { it.idAlimento == alimento.idAlimento }) {
-            alimentosFavoritos.add(alimento)
-        }
-    }
-
-    fun eliminarFavorito(alimento: Alimento) {
-        alimentosFavoritos.removeIf { it.idAlimento == alimento.idAlimento }
-    }
-
-
-
-    fun toggleFavorito(alimento: Alimento) {
-        if (alimentosFavoritos.any { it.idAlimento == alimento.idAlimento }) {
-            alimentosFavoritos.removeIf { it.idAlimento == alimento.idAlimento }
-        } else {
-            alimentosFavoritos.add(alimento)
-        }
-    }
-
- */
 
 }
 

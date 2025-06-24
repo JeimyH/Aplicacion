@@ -1,47 +1,41 @@
 package com.example.frontendproyectoapp.interfaces
 
-import com.example.frontendproyectoapp.model.Alimento
+import com.example.frontendproyectoapp.model.AlimentoReciente
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-interface AlimentoService {
-    @GET("/api/Alimento/listar")
-    suspend fun listarAlimentos(): List<Alimento>
+interface AlimentoRecienteService {
 
-    @GET("/api/Alimento/buscar/{idAlimento}")
-    suspend fun listarIdAlimento(@Path("idAlimento") idAlimento: Long): Alimento
-
-    @GET("api/Alimento/alimentoCategoria/{categoria}")
-    suspend fun obtenerAlimentosPorCategoria(@Path("categoria") categoria: String): List<Alimento>
-
-    @GET("/api/Alimento/buscar/nombre/{nombre}")
-    suspend fun obtenerAlimentoPorNombre(@Path("nombre") nombre: String): Alimento
-
-    @GET("/api/Alimento/favoritos/{idUsuario}")
-    suspend fun obtenerFavoritos(@Path("idUsuario") idUsuario: Long): List<Alimento>
-
-    @POST("/api/Alimento/favoritoAgregar/{idUsuario}/{idAlimento}")
-    suspend fun marcarFavorito(
+    @POST("api/Reciente/registrar/{idUsuario}/{idAlimento}")
+    suspend fun registrarReciente(
         @Path("idUsuario") idUsuario: Long,
         @Path("idAlimento") idAlimento: Long
-    )
+    ): Response<Void>
 
-    @DELETE("/api/Alimento/favoritoEliminar/{idUsuario}/{idAlimento}")
-    suspend fun eliminarFavorito(
+    @GET("api/Reciente/consultar/{idUsuario}")
+    suspend fun obtenerRecientes(
+        @Path("idUsuario") idUsuario: Long
+    ): List<AlimentoReciente>
+
+    @DELETE("api/Reciente/eliminarTodos/{idUsuario}")
+    suspend fun eliminarTodos(@Path("idUsuario") idUsuario: Long): Response<Unit>
+
+    @DELETE("api/Reciente/eliminar/{idUsuario}/{idAlimento}")
+    suspend fun eliminarRecienteIndividual(
         @Path("idUsuario") idUsuario: Long,
         @Path("idAlimento") idAlimento: Long
-    )
+    ): Response<Unit>
 
 }
 
-object RetrofitClientAlimento {
+object RetrofitClientAlimentoReciente {
 
     private const val BASE_URL = "http://10.0.2.2:8080"
     private const val USUARIO = "admin"  // Cambia aquí por tu usuario
@@ -58,12 +52,12 @@ object RetrofitClientAlimento {
         }
         .build()
 
-    val alimentoService: AlimentoService by lazy {
+    val alimentoRecienteService: AlimentoRecienteService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)  // Importante: asigna el cliente con el interceptor
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AlimentoService::class.java)
+            .create(AlimentoRecienteService::class.java)
     }
 }

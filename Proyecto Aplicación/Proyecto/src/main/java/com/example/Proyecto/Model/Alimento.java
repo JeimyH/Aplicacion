@@ -69,4 +69,8 @@ public class Alimento {
     @OneToMany(mappedBy = "alimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<UnidadEquivalencia> unidadEquivalencias;
+
+    @OneToMany(mappedBy = "alimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<AlimentoReciente> alimentosRecientes;
 }

@@ -38,12 +38,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun onCorreoChanged(value: String) {
         correo = value
         correoValidationError = validateCorreo(value)
-        Log.d("LoginViewModel", "Correo cambiado: $correo")
+        //Log.d("LoginViewModel", "Correo cambiado: $correo")
     }
 
     fun onContrasenaChanged(value: String) {
         contrasena = value
-        Log.d("LoginViewModel", "Contraseña cambiada")
+        //Log.d("LoginViewModel", "Contraseña cambiada")
     }
 
     fun validateCorreo(correo: String): String? {
@@ -57,7 +57,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(correo: String, contrasena: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
-            Log.d("LoginViewModel", "Intentando login con: $correo")
+            //Log.d("LoginViewModel", "Intentando login con: $correo")
 
             val result = repositoryUsuario.login(correo, contrasena)
 

@@ -6,37 +6,45 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.Alimento
+import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
 import com.example.frontendproyectoapp.repository.FavoritosRepository
-import com.example.frontendproyectoapp.repository.RegistroAlimentoRepository
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 
 class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val repository = BuscarAlimentoRepository()
-    private val registroRepository = RegistroAlimentoRepository()
+    private val favoritosRepository = FavoritosRepository()
 
+    var errorCarga by mutableStateOf<String?>(null)
     var listaAlimentos by mutableStateOf<List<Alimento>>(emptyList())
     var alimentosFiltrados by mutableStateOf<List<Alimento>>(emptyList())
     var comidasRecientes by mutableStateOf<List<RegistroAlimentoSalida>>(emptyList())
     var favoritos by mutableStateOf<List<Alimento>>(emptyList())
-    var alimentosRecientes by mutableStateOf<List<Alimento>>(emptyList())
+    var alimentosRecientes by mutableStateOf<List<Alimento>>(emptyList()) // ← MISMO TIPO
         private set
     var busqueda by mutableStateOf("")
     var idUsuario: Long? = null
-
     var alimentosAgrupados by mutableStateOf<Map<String, List<Alimento>>>(emptyMap())
 
-    init {
-        viewModelScope.launch {
-            idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
-            cargarDatos()
-        }
-    }
+    var mostrarDialogoRegistro = mutableStateOf(false)
+    var momentoSeleccionado by mutableStateOf("")
 
-    private val favoritosRepository = FavoritosRepository()
+    private val flexibleIsoFormatter: DateTimeFormatter = DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+        .optionalStart()
+        .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+        .optionalEnd()
+        .toFormatter()
 
     init {
         viewModelScope.launch {
@@ -44,6 +52,8 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
             idUsuario?.let {
                 cargarDatos()
                 cargarFavoritos()
+                cargarComidasRecientes()
+                cargarAlimentosRecientes() // ← NUEVO
             }
         }
     }
@@ -82,6 +92,7 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
                     aplicarFiltro()
                 }
             } catch (e: Exception) {
+                errorCarga = "No se pudo cargar la lista de alimentos. Verifica tu conexión."
                 Log.e("BuscarVM", "Error al cargar datos: ${e.message}")
             }
         }
@@ -107,11 +118,28 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun agregarARecientes(alimento: Alimento) {
-        alimentosRecientes = buildList {
-            add(alimento)
-            addAll(alimentosRecientes.filter { it.idAlimento != alimento.idAlimento })
-            if (size > 5) removeAt(lastIndex)
+        viewModelScope.launch {
+            try {
+                idUsuario?.let {
+                    repository.registrarAlimentoReciente(it, alimento.idAlimento)
+                    cargarAlimentosRecientes() // refresca
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error registrando reciente: ${e.message}")
+            }
+        }
+    }
 
+    fun cargarAlimentosRecientes() {
+        viewModelScope.launch {
+            try {
+                idUsuario?.let {
+                    val recientes = repository.obtenerAlimentosRecientes(it)
+                    alimentosRecientes = recientes.take(5).map { it.alimento } // solo los alimentos
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error cargando alimentos recientes: ${e.message}")
+            }
         }
     }
 
@@ -120,12 +148,34 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
             try {
                 val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
                 if (idUsuario != null) {
-                    comidasRecientes = registroRepository.obtenerComidasRecientes(idUsuario)
+                    val todosLosRegistros = repository.obtenerComidasRecientes(idUsuario)
+
+                    val zonaLocal = ZoneId.systemDefault()
+                    val hoyLocal = LocalDate.now(zonaLocal)
+                    Log.d("BuscarVM", "Fecha local actual: $hoyLocal")
+
+                    comidasRecientes = todosLosRegistros.filter { registro ->
+                        try {
+                            val fechaUtc = LocalDateTime.parse(registro.consumidoEn, flexibleIsoFormatter)
+                            val fechaLocal = fechaUtc.atZone(ZoneOffset.UTC).withZoneSameInstant(zonaLocal).toLocalDate()
+                            Log.d("BuscarVM", "Registro: ${registro.alimento?.nombreAlimento} | Local: $fechaLocal")
+                            fechaLocal == hoyLocal
+                        } catch (e: Exception) {
+                            Log.e("BuscarVM", "Error parseando fecha: ${registro.consumidoEn}")
+                            false
+                        }
+                    }
+
+                    Log.d("BuscarVM", "Comidas filtradas hoy: ${comidasRecientes.size}")
                 }
             } catch (e: Exception) {
                 Log.e("BuscarVM", "Error al obtener comidas recientes: ${e.message}")
             }
         }
+    }
+
+    fun obtenerComidasAgrupadasPorMomento(): Map<String, List<RegistroAlimentoSalida>> {
+        return comidasRecientes.groupBy { it.momentoDelDia }
     }
 
     fun cargarAlimentosAgrupados() {
@@ -134,8 +184,8 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
                 idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
 
                 val categorias = listOf(
-                    "Fruta", "Vegetal", "Pescado","Carne", "Proteína vegetal",
-                    "Grasa", "Cereal","Lácteo", "Dulce", "Fruto seco", "Semilla"
+                    "Fruta", "Vegetal", "Pescado", "Carne", "Proteína vegetal",
+                    "Grasa", "Cereal", "Lácteo", "Dulce", "Fruto seco", "Semilla"
                 )
 
                 val agrupados = mutableMapOf<String, List<Alimento>>()
@@ -153,7 +203,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
 
                 alimentosAgrupados = agrupados
 
-                // Favoritos actuales del usuario (si ya existe)
                 idUsuario?.let {
                     favoritos = repository.obtenerFavoritos(it)
                 }
@@ -163,4 +212,60 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
             }
         }
     }
+
+    fun eliminarTodosRecientes() {
+        viewModelScope.launch {
+            try {
+                idUsuario?.let {
+                    Log.d("BuscarVM", "Eliminando TODOS los alimentos recientes del usuario $it")
+                    repository.eliminarTodosRecientes(it)
+                    alimentosRecientes = emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error al eliminar recientes: ${e.message}")
+            }
+        }
+    }
+
+    fun eliminarRecienteIndividual(idAlimento: Long) {
+        viewModelScope.launch {
+            try {
+                idUsuario?.let {
+                    Log.d("BuscarVM", "Eliminando alimento reciente con ID $idAlimento para usuario $it")
+                    repository.eliminarRecienteIndividual(it, idAlimento)
+                    alimentosRecientes = alimentosRecientes.filter { it.idAlimento != idAlimento }
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error al eliminar reciente individual: ${e.message}")
+            }
+        }
+    }
+
+    fun registrarAlimentoDesdeDialogo(
+        idAlimento: Long,
+        cantidad: Float,
+        unidad: String,
+        momento: String
+    ) {
+        viewModelScope.launch {
+            try {
+                idUsuario?.let { uid ->
+                    val dto = RegistroAlimentoEntrada(
+                        idUsuario = uid,
+                        idAlimento = idAlimento,
+                        tamanoPorcion = cantidad,
+                        unidadMedida = unidad,
+                        momentoDelDia = momento
+                    )
+                    repository.guardarRegistro(dto)
+                    Log.d("BuscarVM", "Registro exitoso: alimento=$idAlimento, cantidad=$cantidad $unidad, momento=$momento")
+                    cargarComidasRecientes()
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error registrando alimento desde diálogo: ${e.message}")
+            }
+        }
+    }
+
 }
+

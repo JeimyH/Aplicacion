@@ -24,7 +24,7 @@ public class SeguridadConfiguration {
                         .requestMatchers("/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> {}); // ✅ forma moderna de habilitar httpBasic
+                .httpBasic(httpBasic -> {}); //  forma moderna de habilitar httpBasic
 
         return http.build();
     }

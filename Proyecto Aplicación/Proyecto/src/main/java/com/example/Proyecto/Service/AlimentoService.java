@@ -27,24 +27,6 @@ public class AlimentoService {
     @Autowired
     private UsuarioAlimentoFavoritoRepository favoritoRepository;
 
-    /*
-    public List<Alimento> listarAlimentos(){
-        // Validacion para intentar obtener la lista de alimentos
-        try {
-            List<Alimento> alimentos = alimentoRepository.findAll();
-            // Validar que la lista no sea nula
-            if (alimentos == null) {
-                throw new IllegalStateException("No se encontraron alimentos.");
-            }
-            return alimentos;
-        } catch (Exception e) {
-            // Manejo de excepciones
-            throw new RuntimeException("Error al listar a los alimentos: " + e.getMessage(), e);
-        }
-    }
-
-     */
-
     public Optional<Alimento> listarPorIdAlimento(long idAlimento){
         try {
             Optional<Alimento> alimento = alimentoRepository.findById(idAlimento);
@@ -136,15 +118,6 @@ public class AlimentoService {
     public List<Alimento> obtenerAlimentosPorCategoria(String categoria){
         return alimentoRepository.filtrarAlimentosPorCategoria(categoria);
     }
-/*
-    public List<Alimento> obtenerAlimentosPorCategoria(@Param("categoria") String categoria){
-        return alimentoRepository.filtrarAlimentosPorCategoria(categoria);
-    }
-
-   public List<Alimento> obtenerAlimentosPorUsuario(Long idUsuario){
-        return alimentoRepository.consultarAlimentosPorUsuario(idUsuario);
-    }
- */
 
     public List<Alimento> obtenerAlimentosPorUsuario(@Param("idUsuario") Long idUsuario){
         return alimentoRepository.consultarAlimentosPorUsuario(idUsuario);
@@ -153,12 +126,6 @@ public class AlimentoService {
     public Alimento obtenerInfNutricional(Long idAlimento){
         return alimentoRepository.obtenerInformacionNutricional(idAlimento);
     }
-    /*
-    public Alimento obtenerInfNutricional(@Param("idAlimento") Long idAlimento){
-        return alimentoRepository.obtenerInformacionNutricional(idAlimento);
-    }
-
-     */
 
     public Alimento obtenerAlimentoPorNombre(String nombre) {
         return alimentoRepository.BuscarPorNombreAlimento(nombre);
@@ -166,14 +133,6 @@ public class AlimentoService {
 
     public List<Alimento> listarAlimentos() {
         return alimentoRepository.findAll();
-    }
-
-    public List<Alimento> buscarPorNombre(String nombre) {
-        return alimentoRepository.findByNombreAlimentoContainingIgnoreCase(nombre);
-    }
-
-    public List<Alimento> buscarCoincidenciasPorNombre(String nombre) {
-        return alimentoRepository.findByNombreAlimentoContainingIgnoreCase(nombre);
     }
 
     public void agregarFavorito(Long idUsuario, Long idAlimento) {

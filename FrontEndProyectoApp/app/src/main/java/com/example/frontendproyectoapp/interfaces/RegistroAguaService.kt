@@ -9,35 +9,19 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface RegistroAguaService {
-    @GET("/api/RegistroAgua/listar")
-    suspend fun listarRegistroAgua(): List<RegistroAgua>
 
-    @GET("/api/RegistroAgua/buscar/{id_registroAgua}")
-    suspend fun listarPorIdRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long): RegistroAgua
-
-    @POST("/api/agua/registrar/{idUsuario}")
-    suspend fun registrarAgua(@Path("idUsuario") idUsuario: Long): Response<Void>
-
-    @DELETE("/api/agua/eliminar/{idUsuario}")
-    suspend fun eliminarAgua(@Path("idUsuario") idUsuario: Long): Response<Void>
-
-    @PUT("/api/RegistroAgua/actualizar/{id_registroAgua}")
-    suspend fun actualizarRegistroAgua(@Path("id_registroAgua") id_registroAgua: Long, @Body registro: RegistroAgua): RegistroAgua
-
-    @POST("/api/RegistroAgua/{idUsuario}")
+    @POST("/api/RegistroAgua/registrar/{idUsuario}")
     suspend fun registrarAgua(
         @Path("idUsuario") idUsuario: Long,
         @Body registro: RegistroAguaEntrada
     ): Response<RegistroAguaRespuesta>
 
-    @GET("/api/RegistroAgua/{idUsuario}/hoy")
+    @GET("/api/RegistroAgua/obtener/{idUsuario}/hoy")
     suspend fun obtenerRegistroHoy(
         @Path("idUsuario") idUsuario: Long
     ): Response<RegistroAguaRespuesta?>

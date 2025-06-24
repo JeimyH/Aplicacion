@@ -20,7 +20,7 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
     var estadoCarga by mutableStateOf(false)
         private set
 
-    /** Metodo público para recargar los datos cuando cambia el usuario logueado */
+    // Metodo público para recargar los datos cuando cambia el usuario logueado
     fun cargarDatosUsuarioActual(idUsuario: Long?) {
         if (idUsuario == null) {
             vasosConsumidosHoy = 0
@@ -31,32 +31,17 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
             try {
                 repository.obtenerRegistroDeHoy(idUsuario).onSuccess { registro ->
                     vasosConsumidosHoy = (registro?.cantidadml ?: 0) / 250
+                    Log.d("RegistroAguaViewModel", "Registro cargado: ${registro?.cantidadml} ml")
                 }.onFailure {
                     vasosConsumidosHoy = 0
+                    Log.e("RegistroAguaViewModel", "Error al obtener registro de hoy: ${it.message}")
                 }
             } catch (e: Exception) {
                 vasosConsumidosHoy = 0
+                Log.e("RegistroAguaViewModel", "Excepción al cargar registro de hoy: ${e.message}")
             }
             estadoCarga = false
         }
-    }
-
-
-    private suspend fun cargarRegistroDeHoy(idUsuario: Long) {
-        estadoCarga = true
-        try {
-            repository.obtenerRegistroDeHoy(idUsuario).onSuccess { registro ->
-                vasosConsumidosHoy = (registro?.cantidadml ?: 0) / 250
-                Log.d("RegistroAguaViewModel", "Registro cargado: ${registro?.cantidadml} ml")
-            }.onFailure {
-                vasosConsumidosHoy = 0
-                Log.e("RegistroAguaViewModel", "Error al obtener registro de hoy: ${it.message}")
-            }
-        } catch (e: Exception) {
-            vasosConsumidosHoy = 0
-            Log.e("RegistroAguaViewModel", "Excepción al cargar registro de hoy: ${e.message}")
-        }
-        estadoCarga = false
     }
 
     fun seleccionarCantidadVasos(nuevosVasos: Int) {

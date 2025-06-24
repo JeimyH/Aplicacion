@@ -6,12 +6,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
 import com.example.frontendproyectoapp.model.UserPreferences
-import com.example.frontendproyectoapp.repository.RegistroAlimentoRepository
+import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
 import kotlinx.coroutines.launch
 
 class DetalleAlimentoViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
-    private val repository = RegistroAlimentoRepository()
+    private val repository = BuscarAlimentoRepository()
 
     val estadoRegistro = mutableStateOf(false)
     val error = mutableStateOf<String?>(null)

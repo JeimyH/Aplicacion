@@ -18,6 +18,7 @@ import com.example.frontendproyectoapp.screen.RegistroVent5Screen
 import com.example.frontendproyectoapp.screen.RegistroVent6Screen
 import com.example.frontendproyectoapp.screen.RegistroVent7Screen
 import com.example.frontendproyectoapp.screen.RegistroVent8Screen
+import com.example.frontendproyectoapp.screen.RegistroVent9Screen
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 @Composable
@@ -28,9 +29,10 @@ fun AppNavigation(navController: NavHostController, viewModel: UsuarioViewModel)
         composable("registro3") { RegistroVent3Screen(navController, viewModel) }
         composable("registro4") { RegistroVent4Screen(navController, viewModel) }
         composable("registro5") { RegistroVent5Screen(navController, viewModel) }
-        composable("registro6") { RegistroVent6Screen(navController) }
-        composable("registro7") { RegistroVent7Screen(navController, viewModel) }
+        composable("registro6") { RegistroVent6Screen(navController, viewModel) }
+        composable("registro7") { RegistroVent7Screen(navController) }
         composable("registro8") { RegistroVent8Screen(navController, viewModel) }
+        composable("registro9") { RegistroVent9Screen(navController, viewModel) }
         composable("inicio") { InicioScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("buscarAlimentos") {BuscarAlimentoScreen(navController)}

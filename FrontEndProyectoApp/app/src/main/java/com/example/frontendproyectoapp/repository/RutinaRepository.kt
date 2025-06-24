@@ -2,7 +2,6 @@ package com.example.frontendproyectoapp.repository
 
 import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
 import com.example.frontendproyectoapp.model.Alimento
-import java.time.LocalDate
 
 class RutinaRepository {
     suspend fun obtenerFavoritos(idUsuario: Long): List<Alimento> {

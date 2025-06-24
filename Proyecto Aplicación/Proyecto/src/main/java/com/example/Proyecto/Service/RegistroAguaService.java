@@ -20,7 +20,7 @@ public class RegistroAguaService {
     public RegistroAguaRepository registroAguaRepository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    public UsuarioRepository usuarioRepository;
 
     public List<RegistroAgua> listarRegistrosAgua(){
         // Validacion para intentar obtener la lista de Registros de Agua
@@ -118,13 +118,6 @@ public class RegistroAguaService {
     public RegistroAgua obtenerRegistroDeHoy(Long idUsuario) {
         return registroAguaRepository
                 .findByUsuario_IdUsuarioAndFecha(idUsuario, LocalDate.now())
-                .orElse(null);
-    }
-
-    // Nuevo metodo para obtener registro por fecha específica
-    public RegistroAgua obtenerRegistroPorFecha(Long idUsuario, LocalDate fecha) {
-        return registroAguaRepository
-                .findByUsuario_IdUsuarioAndFecha(idUsuario, fecha)
                 .orElse(null);
     }
 
