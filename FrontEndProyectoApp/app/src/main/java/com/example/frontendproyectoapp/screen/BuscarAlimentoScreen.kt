@@ -53,9 +53,10 @@ fun BuscarAlimentoScreen(navController: NavHostController) {
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.cargarFavoritos()
-                viewModel.cargarAlimentosRecientes()
-                viewModel.cargarComidasRecientes()
+                viewModel.actualizarUsuarioYDatos()
+                //viewModel.cargarFavoritos()
+                //viewModel.cargarAlimentosRecientes()
+                //viewModel.cargarComidasRecientes()
             }
         }
         lifecycle?.addObserver(observer)

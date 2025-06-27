@@ -58,6 +58,19 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun actualizarUsuarioYDatos() {
+        viewModelScope.launch {
+            idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+            idUsuario?.let {
+                cargarDatos()
+                cargarFavoritos()
+                cargarComidasRecientes()
+                cargarAlimentosRecientes()
+            }
+        }
+    }
+
+
     fun cargarFavoritos() {
         viewModelScope.launch {
             idUsuario?.let {
