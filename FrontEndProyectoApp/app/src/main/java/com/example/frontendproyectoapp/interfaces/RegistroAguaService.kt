@@ -1,5 +1,6 @@
 package com.example.frontendproyectoapp.interfaces
 
+import com.example.frontendproyectoapp.model.ActividadDia
 import com.example.frontendproyectoapp.model.RegistroAgua
 import com.example.frontendproyectoapp.model.RegistroAguaEntrada
 import com.example.frontendproyectoapp.model.RegistroAguaRespuesta
@@ -9,9 +10,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.time.LocalDate
 
 interface RegistroAguaService {
 
@@ -25,11 +28,20 @@ interface RegistroAguaService {
     suspend fun obtenerRegistroHoy(
         @Path("idUsuario") idUsuario: Long
     ): Response<RegistroAguaRespuesta?>
+
+    @DELETE("/api/RegistroAgua/eliminar/{idUsuario}/hoy")
+    suspend fun eliminarRegistroDeHoy(
+        @Path("idUsuario") idUsuario: Long
+    ): Response<Void>
+
+    @GET("/api/Actividad/dias-con-actividad/{idUsuario}")
+    suspend fun obtenerDiasConActividad(@Path("idUsuario") idUsuario: Long): Response<List<ActividadDia>>
+
 }
 
 object RetrofitClientRegistroAgua {
     // private const val BASE_URL = "http://10.0.2.2:8080"
-    private const val BASE_URL = "http://192.168.1.5:8080"
+    private const val BASE_URL = "http://192.168.1.4:8080"
     private const val USUARIO = "admin"  // Cambia aquí por tu usuario
     private const val PASSWORD = "admin123" // Cambia aquí por tu contraseña
 

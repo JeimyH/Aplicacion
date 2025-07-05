@@ -6,8 +6,11 @@ import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.frontendproyectoapp.model.ActividadDia
 import com.example.frontendproyectoapp.model.UserPreferences
 import com.example.frontendproyectoapp.repository.RegistroAguaRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 class RegistroAguaViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,6 +22,32 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
 
     var estadoCarga by mutableStateOf(false)
         private set
+
+    private val _mensajeUI = MutableSharedFlow<String>()
+    val mensajeUI: SharedFlow<String> = _mensajeUI
+
+    private val _diasConActividad = mutableStateListOf<ActividadDia>()
+    val diasConActividad: List<ActividadDia> get() = _diasConActividad
+
+    var cargando by mutableStateOf(false)
+        private set
+
+    private var idUsuarioActual: Long? = null
+
+    fun establecerIdUsuario(id: Long?) {
+        idUsuarioActual = id
+    }
+
+    fun cargarDiasConActividad() {
+        viewModelScope.launch {
+            val idUsuario = idUsuarioActual ?: return@launch
+            val resultado = repository.obtenerDiasConActividad(idUsuario)
+            if (resultado.isSuccess) {
+                _diasConActividad.clear()
+                _diasConActividad.addAll(resultado.getOrDefault(emptyList()))
+            }
+        }
+    }
 
     // Metodo público para recargar los datos cuando cambia el usuario logueado
     fun cargarDatosUsuarioActual(idUsuario: Long?) {
@@ -50,22 +79,30 @@ class RegistroAguaViewModel(application: Application) : AndroidViewModel(applica
 
     fun registrarAgua() {
         viewModelScope.launch {
-            try {
-                val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
-                if (idUsuario != null) {
-                    val cantidadml = vasosConsumidosHoy * 250
-                    repository.registrarAgua(idUsuario, cantidadml).onSuccess {
-                        Log.d("RegistroAguaViewModel", "Registro actualizado correctamente: $it")
+            val idUsuario = UserPreferences.obtenerIdUsuarioActual(context)
+            if (idUsuario != null) {
+                if (vasosConsumidosHoy == 0) {
+                    repository.eliminarRegistroDeHoy(idUsuario).onSuccess {
+                        _mensajeUI.emit("Registro de agua eliminado")
+                        cargarDatosUsuarioActual(idUsuario)
+                        cargarDiasConActividad()
                     }.onFailure {
-                        Log.e("RegistroAguaViewModel", "Error al registrar agua: ${it.message}")
+                        _mensajeUI.emit("Error al eliminar: ${it.message}")
                     }
                 } else {
-                    Log.e("RegistroAguaViewModel", "ID de usuario nulo al registrar agua")
+                    val cantidadml = vasosConsumidosHoy * 250
+                    repository.registrarAgua(idUsuario, cantidadml).onSuccess {
+                        _mensajeUI.emit("Registro actualizado: $cantidadml ml")
+                        cargarDatosUsuarioActual(idUsuario)
+                        cargarDiasConActividad()
+                    }.onFailure {
+                        _mensajeUI.emit("Error al registrar: ${it.message}")
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("RegistroAguaViewModel", "Excepción al registrar agua: ${e.message}")
             }
         }
+
     }
+
 }
 

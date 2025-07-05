@@ -5,10 +5,8 @@ import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.RegistroAguaRepository;
 import com.example.Proyecto.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -119,6 +117,11 @@ public class RegistroAguaService {
         return registroAguaRepository
                 .findByUsuario_IdUsuarioAndFecha(idUsuario, LocalDate.now())
                 .orElse(null);
+    }
+
+    public void eliminarRegistroDeHoy(Long idUsuario) {
+        LocalDate hoy = LocalDate.now();
+        registroAguaRepository.eliminarRegistroPorUsuarioYFecha(idUsuario, hoy);
     }
 
 }

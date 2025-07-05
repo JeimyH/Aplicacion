@@ -5,26 +5,17 @@ import com.example.Proyecto.Model.Alimento;
 import com.example.Proyecto.Model.AlimentoReciente;
 import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.AlimentoRecienteRepository;
-import com.example.Proyecto.Repository.AlimentoRepository;
-import com.example.Proyecto.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class AlimentoRecienteService {
     @Autowired
     public AlimentoRecienteRepository alimentoRecienteRepository;
-
-    @Autowired
-    public UsuarioRepository usuarioRepository;
-
-    @Autowired
-    public AlimentoRepository alimentoRepository;
 
     public void registrarAlimentoReciente(Long idUsuario, Alimento alimento, Usuario usuario) {
         // Eliminar si ya existe

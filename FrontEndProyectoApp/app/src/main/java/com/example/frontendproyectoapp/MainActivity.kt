@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.frontendproyectoapp.navigation.AppNavigation
+import com.example.frontendproyectoapp.ui.theme.FrontEndProyectoAppTheme
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 class MainActivity : ComponentActivity() {
@@ -17,17 +18,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val context = LocalContext.current.applicationContext as Application
+            FrontEndProyectoAppTheme {
+                val context = LocalContext.current.applicationContext as Application
 
-            val usuarioViewModel: UsuarioViewModel = viewModel(
-                factory = ViewModelProvider.AndroidViewModelFactory(context)
-            )
+                val usuarioViewModel: UsuarioViewModel = viewModel(
+                    factory = ViewModelProvider.AndroidViewModelFactory(context)
+                )
 
-            val navController = rememberNavController()
-            AppNavigation(
-                navController = navController,
-                viewModel = usuarioViewModel
-            )
+                val navController = rememberNavController()
+                AppNavigation(
+                    navController = navController,
+                    viewModel = usuarioViewModel
+                )
+            }
         }
     }
 }

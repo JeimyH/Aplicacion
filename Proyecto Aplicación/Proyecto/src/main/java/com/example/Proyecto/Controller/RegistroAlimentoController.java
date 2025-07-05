@@ -2,7 +2,6 @@ package com.example.Proyecto.Controller;
 
 import com.example.Proyecto.DTO.RegistroAlimentoEntradaDTO;
 import com.example.Proyecto.DTO.RegistroAlimentoSalidaDTO;
-import com.example.Proyecto.DTO.RegistroPorFechaYMomentoDTO;
 import com.example.Proyecto.Model.RegistroAlimento;
 import com.example.Proyecto.Service.RegistroAlimentoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class RegistroAlimentoController {
         return ResponseEntity.ok(lista);
     }
 
-    //
+    // No lo estoy usando en el Front
     @GetMapping("/usuario/{idUsuario}/fecha/{fecha}/momento/{momento}")
     public List<RegistroAlimentoSalidaDTO> obtenerPorUsuarioFechaYMomento(
             @PathVariable Long idUsuario,
@@ -46,5 +45,22 @@ public class RegistroAlimentoController {
         List<RegistroAlimento> registros = registroAlimentoService.obtenerPorUsuarioFechaYMomento(idUsuario, fecha, momento);
         return registros.stream().map(RegistroAlimentoSalidaDTO::new).toList();
     }
+
+    @DeleteMapping("/eliminar/{idUsuario}/{momento}/{fecha}")
+    public ResponseEntity<Void> eliminarRegistrosPorMomentoYFecha(
+            @PathVariable Long idUsuario,
+            @PathVariable String momento,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+
+        registroAlimentoService.eliminarPorMomentoYFecha(idUsuario, momento, fecha);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/eliminar/{idRegistro}")
+    public ResponseEntity<String> eliminarRegistroPorId(@PathVariable Long idRegistro) {
+        registroAlimentoService.eliminarRegistroPorId(idRegistro);
+        return ResponseEntity.ok("Registro eliminado con éxito");
+    }
+
 
 }

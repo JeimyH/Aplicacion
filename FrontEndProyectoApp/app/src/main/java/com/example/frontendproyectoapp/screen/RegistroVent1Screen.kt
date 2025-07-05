@@ -62,6 +62,7 @@ fun RegistroVent1ScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +78,7 @@ fun RegistroVent1ScreenContent(
             modifier = Modifier
                 .size(340.dp)
                 .clip(CircleShape)
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -86,6 +87,7 @@ fun RegistroVent1ScreenContent(
             text = "PERSONALIZA Y DISEÑA TU RUTINA CON DIETASMART",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -94,17 +96,25 @@ fun RegistroVent1ScreenContent(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = onClick) {
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors( // ✅ ADAPTADO al tema
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
                 Text("Registrarse")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row {
-                Text("¿Ya tienes una cuenta?")
+                Text("¿Ya tienes una cuenta?",
+                    color = MaterialTheme.colorScheme.onBackground
+                    )
                 Text(
                     text = " Inicia Sesión",
-                    color = Color.Blue,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onLoginClick() }
                 )
             }

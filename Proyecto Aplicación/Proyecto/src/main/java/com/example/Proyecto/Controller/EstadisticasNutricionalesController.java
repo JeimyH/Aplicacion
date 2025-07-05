@@ -1,12 +1,15 @@
 package com.example.Proyecto.Controller;
 
+import com.example.Proyecto.DTO.NutrientesTotalesDTO;
 import com.example.Proyecto.Model.EstadisticasNutricionales;
 import com.example.Proyecto.Service.EstadisticasNutricionalesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -70,5 +73,14 @@ public class EstadisticasNutricionalesController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
         }
+    }
+
+    @GetMapping("/totales")
+    public ResponseEntity<NutrientesTotalesDTO> obtenerTotales(
+            @RequestParam Long idUsuario,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha
+    ) {
+        NutrientesTotalesDTO resultado = estadisticasService.obtenerTotalesPorFecha(idUsuario, fecha);
+        return ResponseEntity.ok(resultado);
     }
 }

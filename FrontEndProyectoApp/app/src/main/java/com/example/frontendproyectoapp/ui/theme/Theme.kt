@@ -13,31 +13,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
-    primary = GreenPrimary,
-    secondary = RedSecondary,
-    tertiary = YellowAccent,
-    background = BackgroundLight,
+    primary = PastelMint,
+    secondary = PastelPeach,
+    tertiary = PastelYellow,
+    background = PastelBackground,
     surface = SurfaceLight,
-    onPrimary = OnPrimaryText,
+    onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.Black,
-    onBackground = OnBackgroundText,
-    onSurface = Color.Black,
+    onBackground = TextOlive,
+    onSurface = TextOlive,
+    error = PastelError,
+    onError = Color.White
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenPrimary,
-    secondary = RedSecondary,
-    tertiary = YellowAccent,
-    background = Color(0xFF1B1B1B),
-    surface = Color(0xFF2C2C2C),
-    onPrimary = OnPrimaryText,
-    onSecondary = Color.White,
+    primary = PastelMint,
+    secondary = PastelPeach,
+    tertiary = PastelYellow,
+    background = Color(0xFF2C2C2C),
+    surface = Color(0xFF1E1E1E),
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
     onTertiary = Color.Black,
     onBackground = Color.White,
     onSurface = Color.White,
+    error = PastelError,
+    onError = Color.Black
 )
-
 
 @Composable
 fun FrontEndProyectoAppTheme(

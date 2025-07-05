@@ -1,6 +1,7 @@
 package com.example.frontendproyectoapp.repository
 
 import com.example.frontendproyectoapp.interfaces.RetrofitClientRegistroAgua
+import com.example.frontendproyectoapp.model.ActividadDia
 import com.example.frontendproyectoapp.model.RegistroAguaEntrada
 import com.example.frontendproyectoapp.model.RegistroAguaRespuesta
 
@@ -30,4 +31,31 @@ class RegistroAguaRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun eliminarRegistroDeHoy(idUsuario: Long): Result<Unit> {
+        return try {
+            val response = RetrofitClientRegistroAgua.registroAguaService.eliminarRegistroDeHoy(idUsuario)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Error al eliminar: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerDiasConActividad(idUsuario: Long): Result<List<ActividadDia>> {
+        return try {
+            val response = RetrofitClientRegistroAgua.registroAguaService.obtenerDiasConActividad(idUsuario)
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: emptyList())
+            } else {
+                Result.failure(Exception("Error: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

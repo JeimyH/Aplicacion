@@ -1,19 +1,13 @@
 package com.example.Proyecto.Service;
 
 import com.example.Proyecto.DTO.UsuarioEntradaDTO;
-import com.example.Proyecto.Model.PreferenciasUsuario;
 import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service

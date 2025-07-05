@@ -1,5 +1,11 @@
 package com.example.frontendproyectoapp.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -55,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.frontendproyectoapp.ui.theme.dotAgua
+import com.example.frontendproyectoapp.ui.theme.dotAmbos
+import com.example.frontendproyectoapp.ui.theme.dotComida
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -233,20 +243,19 @@ fun CaloriasGraph(caloriasMin: Int, caloriasMax: Int) {
     }
 }
 
-
-
 @Composable
 fun CustomCalendar(
     selectedDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
+    diasConActividad: Map<LocalDate, Set<String>>
 ) {
-    //val today = LocalDate.now()
     val today = remember { LocalDate.now(ZoneId.systemDefault()) }
     val currentMonth = remember { mutableStateOf(YearMonth.now()) }
     val daysInMonth = currentMonth.value.lengthOfMonth()
     val firstDayOfWeek = currentMonth.value.atDay(1).dayOfWeek.value % 7
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Encabezado del mes
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -273,6 +282,7 @@ fun CustomCalendar(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Días de la semana
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -284,8 +294,10 @@ fun CustomCalendar(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // Celdas del calendario
         val totalCells = daysInMonth + firstDayOfWeek
         val weeks = (totalCells / 7) + if (totalCells % 7 != 0) 1 else 0
+
         Column {
             repeat(weeks) { week ->
                 Row(
@@ -299,30 +311,50 @@ fun CustomCalendar(
                         } else {
                             val day = dayIndex - firstDayOfWeek + 1
                             val date = currentMonth.value.atDay(day)
-
                             val isSelected = date == selectedDate
                             val isToday = date == today
 
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        when {
-                                            isSelected -> Color(0xFF2196F3)
-                                            isToday -> Color.LightGray
-                                            else -> Color.Transparent
-                                        }
+                            val tipoActividad = diasConActividad[date] ?: emptySet()
+                            val color = when {
+                                tipoActividad.contains("AMBOS") -> MaterialTheme.colorScheme.dotAmbos
+                                tipoActividad.contains("AGUA") -> MaterialTheme.colorScheme.dotAgua
+                                tipoActividad.contains("COMIDA") -> MaterialTheme.colorScheme.dotComida
+                                else -> Color.Transparent
+                            }
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            when {
+                                                isSelected -> MaterialTheme.colorScheme.primary
+                                                isToday -> Color.LightGray
+                                                else -> Color.Transparent
+                                            }
+                                        )
+                                        .clickable { onDateSelected(date) }
+                                ) {
+                                    Text(
+                                        text = day.toString(),
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.onPrimary
+                                        else
+                                            MaterialTheme.colorScheme.onBackground
                                     )
-                                    .clickable {
-                                        onDateSelected(date)
+                                }
+
+                                if (color != Color.Transparent) {
+                                    Canvas(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .padding(top = 2.dp)
+                                    ) {
+                                        drawCircle(color = color)
                                     }
-                            ) {
-                                Text(
-                                    text = day.toString(),
-                                    color = if (isSelected) Color.White else Color.Black
-                                )
+                                }
                             }
                         }
                     }
@@ -332,3 +364,67 @@ fun CustomCalendar(
         }
     }
 }
+
+@Composable
+fun LeyendaActividadCalendario(expandido: Boolean, onDismiss: () -> Unit) {
+    AnimatedVisibility(
+        visible = expandido,
+        enter = expandVertically(animationSpec = tween(300)) + fadeIn(),
+        exit = shrinkVertically(animationSpec = tween(200)) + fadeOut()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(12.dp)
+        ) {
+            Text("Leyenda del Calendario", style = MaterialTheme.typography.titleSmall)
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(MaterialTheme.colorScheme.dotAgua, shape = CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Día con registro de agua", style = MaterialTheme.typography.bodySmall)
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(MaterialTheme.colorScheme.dotComida, shape = CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Día con registro de comida", style = MaterialTheme.typography.bodySmall)
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(MaterialTheme.colorScheme.dotAmbos, shape = CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Día con ambos registros", style = MaterialTheme.typography.bodySmall)
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                "Toca el ícono nuevamente para cerrar.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+

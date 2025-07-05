@@ -70,7 +70,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-
     fun cargarFavoritos() {
         viewModelScope.launch {
             idUsuario?.let {
@@ -187,10 +186,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    fun obtenerComidasAgrupadasPorMomento(): Map<String, List<RegistroAlimentoSalida>> {
-        return comidasRecientes.groupBy { it.momentoDelDia }
-    }
-
     fun cargarAlimentosAgrupados() {
         viewModelScope.launch {
             try {
@@ -219,7 +214,6 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
                 idUsuario?.let {
                     favoritos = repository.obtenerFavoritos(it)
                 }
-
             } catch (e: Exception) {
                 Log.e("BuscarVM", "Error general al cargar alimentos: ${e.message}")
             }
@@ -276,6 +270,48 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
                 }
             } catch (e: Exception) {
                 Log.e("BuscarVM", "Error registrando alimento desde diálogo: ${e.message}")
+            }
+        }
+    }
+
+    fun eliminarRegistrosPorMomentoYFecha(momento: String) {
+        viewModelScope.launch {
+            try {
+                val idUsuarioActual = UserPreferences.obtenerIdUsuarioActual(context)
+                val hoy = LocalDate.now(ZoneId.systemDefault())
+                val fechaStr = hoy.format(DateTimeFormatter.ISO_DATE)
+
+                Log.d("BuscarVM", "Intentando eliminar registros para:")
+                Log.d("BuscarVM", "→ ID Usuario: $idUsuarioActual")
+                Log.d("BuscarVM", "→ Fecha: $fechaStr")
+                Log.d("BuscarVM", "→ Momento del día: $momento")
+
+                if (idUsuarioActual != null) {
+                    val response = repository.eliminarRegistrosPorFechaYMomento(
+                        idUsuario = idUsuarioActual,
+                        fecha = fechaStr,
+                        momento = momento
+                    )
+                    if (response.isSuccessful) {
+                        Log.d("BuscarVM", "✔ Registros eliminados correctamente para $momento")
+                        cargarComidasRecientes()
+                    } else {
+                        Log.e("BuscarVM", "✖ Error al eliminar registros: ${response.code()} ${response.message()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "✖ Excepción al eliminar registros: ${e.message}")
+            }
+        }
+    }
+
+    fun eliminarRegistroIndividual(idRegistro: Long) {
+        viewModelScope.launch {
+            try {
+                repository.eliminarRegistroPorId(idRegistro)
+                cargarComidasRecientes()
+            } catch (e: Exception) {
+                Log.e("BuscarVM", "Error al eliminar registro individual: ${e.message}")
             }
         }
     }

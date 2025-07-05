@@ -15,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,6 +44,7 @@ fun InicioScreenContent(
     navController: NavHostController
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now(ZoneId.systemDefault())) }
+    var mostrarLeyenda by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val idUsuarioFlow = produceState<Long?>(initialValue = null) {
@@ -56,13 +56,36 @@ fun InicioScreenContent(
     val cantidadVasos = 8
     val vasosConsumidos = viewModel.vasosConsumidosHoy
     val estadoCarga = viewModel.estadoCarga
+    val diasConActividad = viewModel.diasConActividad
 
-    // Cargar el registro del usuario actual cada vez que cambia
+    val colorSeleccionado = MaterialTheme.colorScheme.primary
+    val colorNoSeleccionado = MaterialTheme.colorScheme.surfaceVariant
+    val iconTintSeleccionado = MaterialTheme.colorScheme.onPrimary
+    val iconTintNoSeleccionado = MaterialTheme.colorScheme.onSurface
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val diasConActividadMap = diasConActividad
+        .groupBy { LocalDate.parse(it.fecha) }
+        .mapValues { it.value.map { it.tipo }.toSet() }
+
+    // Cargar los datos del usuario cuando cambia
     LaunchedEffect(idUsuarioFlow.value) {
+        viewModel.establecerIdUsuario(idUsuarioFlow.value)
         viewModel.cargarDatosUsuarioActual(idUsuarioFlow.value)
+        viewModel.cargarDiasConActividad()
+    }
+
+    // Mostrar mensaje desde el ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.mensajeUI.collect { mensaje ->
+            snackbarHostState.showSnackbar(mensaje)
+        }
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomNavigationBar(navController)
         }
@@ -75,34 +98,60 @@ fun InicioScreenContent(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Engranaje configuración
+            // Ajustes
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = {
-                    navController.navigate("ajustes")
-                }) {
-                    Icon(Icons.Default.Settings, contentDescription = "Ir a ajustes")
+                IconButton(onClick = { navController.navigate("ajustes") }) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = "Ir a ajustes",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Calendario
             CustomCalendar(
                 selectedDate = selectedDate,
-                onDateSelected = { selectedDate = it }
+                onDateSelected = { selectedDate = it },
+                diasConActividad = diasConActividadMap
             )
+
+            //LeyendaCalendario()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { mostrarLeyenda = !mostrarLeyenda }) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Mostrar leyenda",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            LeyendaActividadCalendario(expandido = mostrarLeyenda, onDismiss = { mostrarLeyenda = false })
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 "Calorías Totales / Calorías Recomendadas",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Text("Kcal", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Kcal",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             CaloriasGraph(caloriasMin = 1800, caloriasMax = 2200)
 
@@ -119,7 +168,12 @@ fun InicioScreenContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("¿Cuántos vasos de agua has tomado hoy?", style = MaterialTheme.typography.titleMedium)
+            // Agua
+            Text(
+                "¿Cuántos vasos de agua has tomado hoy?",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -127,7 +181,7 @@ fun InicioScreenContent(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp), // ajusta si necesitas más espacio
+                    .height(120.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 userScrollEnabled = false
@@ -136,20 +190,21 @@ fun InicioScreenContent(
                     val seleccionado = vaso <= vasosConsumidos
                     IconButton(
                         onClick = {
-                            viewModel.seleccionarCantidadVasos(vaso)
+                            val nuevaCantidad = if (vaso == vasosConsumidos) 0 else vaso
+                            viewModel.seleccionarCantidadVasos(nuevaCantidad)
                             viewModel.registrarAgua()
                         },
                         modifier = Modifier
                             .size(48.dp)
                             .background(
-                                if (seleccionado) Color(0xFF64B5F6) else Color(0xFFE0E0E0),
+                                color = if (seleccionado) colorSeleccionado else colorNoSeleccionado,
                                 shape = CircleShape
                             )
                     ) {
                         Icon(
                             imageVector = Icons.Default.LocalDrink,
                             contentDescription = null,
-                            tint = if (seleccionado) Color.White else Color.Black
+                            tint = if (seleccionado) iconTintSeleccionado else iconTintNoSeleccionado
                         )
                     }
                 }
@@ -157,15 +212,21 @@ fun InicioScreenContent(
 
             Spacer(Modifier.height(16.dp))
 
-            Text("Total consumido: ${vasosConsumidos * 250} ml", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                "Total consumido: ${vasosConsumidos * 250} ml",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             if (estadoCarga) {
-                CircularProgressIndicator(Modifier.padding(top = 16.dp))
+                CircularProgressIndicator(
+                    Modifier.padding(top = 16.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

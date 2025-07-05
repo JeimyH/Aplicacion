@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import android.app.Application
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -38,42 +37,48 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.frontendproyectoapp.model.Alimento
+import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModel
 import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModelFactory
 
+// Pantalla principal de búsqueda de alimentos
 @Composable
 fun BuscarAlimentoScreen(navController: NavHostController) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
+
+    // Se obtiene el ViewModel con su fábrica personalizada
     val viewModel: BuscarAlimentoViewModel = viewModel(factory = BuscarAlimentoViewModelFactory(application))
 
+    // Detecta cambios en el ciclo de vida de la pantalla
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val lifecycle = currentBackStackEntry?.lifecycle
 
+    // Se usa DisposableEffect para ejecutar lógica cuando el screen vuelve a estar activo
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                // Se actualizan los datos del usuario al volver a la pantalla
                 viewModel.actualizarUsuarioYDatos()
-                //viewModel.cargarFavoritos()
-                //viewModel.cargarAlimentosRecientes()
-                //viewModel.cargarComidasRecientes()
             }
         }
         lifecycle?.addObserver(observer)
-        onDispose { lifecycle?.removeObserver(observer) }
+        onDispose { lifecycle?.removeObserver(observer) } // Limpia el observer al salir
     }
 
+    // Llama al contenido visual del screen
     BuscarAlimentoScreenContent(viewModel, navController)
 }
 
+// Contenido principal del screen
 @Composable
 fun BuscarAlimentoScreenContent(
     viewModel: BuscarAlimentoViewModel,
     navController: NavHostController
 ) {
-    val mostrarBaseDatos = remember { mutableStateOf(false) }
-    val isSearchFocused = remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
+    val mostrarBaseDatos = remember { mutableStateOf(false) } // Si se muestra la base de datos completa
+    val isSearchFocused = remember { mutableStateOf(false) } // Si el campo de búsqueda tiene foco
+    val focusManager = LocalFocusManager.current // Para manejar el enfoque de teclado
 
     Scaffold(bottomBar = { BottomNavigationBar(navController) }) { innerPadding ->
         Box(
@@ -82,7 +87,7 @@ fun BuscarAlimentoScreenContent(
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
-                ) { focusManager.clearFocus()}
+                ) { focusManager.clearFocus()} // Quita el foco al tocar fuera
         ) {
             Column(
                 modifier = Modifier
@@ -94,6 +99,7 @@ fun BuscarAlimentoScreenContent(
                 BarraBusqueda(viewModel, mostrarBaseDatos, isSearchFocused)
                 BotonesSuperiores(viewModel, navController, mostrarBaseDatos)
 
+                // Muestra errores o loading según el estado del ViewModel
                 if (viewModel.errorCarga != null) {
                     MostrarError(viewModel)
                 } else if (viewModel.listaAlimentos.isEmpty() && viewModel.busqueda.isBlank() && !mostrarBaseDatos.value) {
@@ -119,6 +125,7 @@ fun BuscarAlimentoScreenContent(
     }
 }
 
+// Campo de texto para buscar alimentos
 @Composable
 fun BarraBusqueda(
     viewModel: BuscarAlimentoViewModel,
@@ -249,9 +256,11 @@ fun SeccionConsumoDiario(viewModel: BuscarAlimentoViewModel, navController: NavH
     Text("Resumen de Consumo Diario", style = MaterialTheme.typography.titleMedium)
     Spacer(modifier = Modifier.height(8.dp))
 
-    // Agrupamos dinámicamente por momento del día
     val comidasAgrupadas = viewModel.comidasRecientes.groupBy { it.momentoDelDia }
     val momentos = listOf("Desayuno", "Almuerzo", "Cena", "Snack")
+
+    // Estado para mostrar diálogo de confirmación
+    var registroAEliminar by remember { mutableStateOf<RegistroAlimentoSalida?>(null) }
 
     momentos.forEach { momento ->
         Row(
@@ -260,13 +269,23 @@ fun SeccionConsumoDiario(viewModel: BuscarAlimentoViewModel, navController: NavH
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(momento, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            TextButton(onClick = {
-                viewModel.mostrarDialogoRegistro.value = true
-                viewModel.momentoSeleccionado = momento
-            }) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(4.dp))
-                Text("Agregar")
+            Row {
+                TextButton(onClick = {
+                    viewModel.eliminarRegistrosPorMomentoYFecha(momento)
+                }) {
+                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Gray)
+                    Spacer(Modifier.width(4.dp))
+                    Text("Eliminar")
+                }
+
+                TextButton(onClick = {
+                    viewModel.mostrarDialogoRegistro.value = true
+                    viewModel.momentoSeleccionado = momento
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
+                    Text("Agregar")
+                }
             }
         }
 
@@ -289,8 +308,10 @@ fun SeccionConsumoDiario(viewModel: BuscarAlimentoViewModel, navController: NavH
                     onToggleFavorito = {
                         viewModel.toggleFavorito(registro.alimento)
                     },
-                    onEliminarFavorito = null,
-                    mostrarFavorito = false // ocultamos favoritos en esta sección
+                    onEliminarFavorito = {
+                        registroAEliminar = registro // Abrir diálogo de confirmación
+                    },
+                    mostrarFavorito = false
                 )
             }
         }
@@ -299,8 +320,31 @@ fun SeccionConsumoDiario(viewModel: BuscarAlimentoViewModel, navController: NavH
     }
 
     DialogoRegistroAlimento(viewModel)
-}
 
+    // Diálogo de confirmación para eliminación individual
+    if (registroAEliminar != null) {
+        AlertDialog(
+            onDismissRequest = { registroAEliminar = null },
+            title = { Text("Eliminar alimento") },
+            text = { Text("¿Estás seguro de que deseas eliminar este alimento del registro?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.eliminarRegistroIndividual(registroAEliminar!!.idRegistroAlimento)
+                        registroAEliminar = null
+                    }
+                ) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { registroAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+}
 
 @Composable
 fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
@@ -308,7 +352,20 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
 
     var alimentoSeleccionado by remember { mutableStateOf<Alimento?>(null) }
     var cantidadTexto by remember { mutableStateOf("") }
+
+    // Estado para unidad de medida
     var unidadTexto by remember { mutableStateOf("") }
+    var unidadExpanded by remember { mutableStateOf(false) }
+
+    // Lista fija de unidades válidas
+    val unidadesDeMedida = listOf(
+        "mg", "g", "kg",
+        "ml", "l",
+        "tsp", "tbsp", "cup",
+        "oz", "lb",
+        "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "lonja", "filete", "puñado"
+    )
+
     val listaAlimentos = viewModel.listaAlimentos
     val contexto = LocalContext.current
 
@@ -324,6 +381,7 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
             Column {
                 var expanded by remember { mutableStateOf(false) }
 
+                // Campo de selección de alimento
                 OutlinedTextField(
                     value = alimentoSeleccionado?.nombreAlimento ?: "",
                     onValueChange = {},
@@ -357,6 +415,7 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Campo de cantidad
                 OutlinedTextField(
                     value = cantidadTexto,
                     onValueChange = { cantidadTexto = it },
@@ -367,19 +426,48 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    value = unidadTexto,
-                    onValueChange = { unidadTexto = it },
-                    label = { Text("Unidad de medida") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Campo desplegable de unidad
+                Text("Unidad de medida", style = MaterialTheme.typography.labelSmall)
+                Box {
+                    OutlinedTextField(
+                        value = unidadTexto,
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { unidadExpanded = true },
+                        trailingIcon = {
+                            IconButton(onClick = { unidadExpanded = !unidadExpanded }) {
+                                Icon(
+                                    imageVector = if (unidadExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+
+                    DropdownMenu(
+                        expanded = unidadExpanded,
+                        onDismissRequest = { unidadExpanded = false }
+                    ) {
+                        unidadesDeMedida.forEach { unidad ->
+                            DropdownMenuItem(
+                                text = { Text(unidad) },
+                                onClick = {
+                                    unidadTexto = unidad
+                                    unidadExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
                     val cantidad = cantidadTexto.toFloatOrNull()
-                    if (alimentoSeleccionado != null && !unidadTexto.isBlank() && cantidad != null) {
+                    if (alimentoSeleccionado != null && unidadTexto.isNotBlank() && cantidad != null) {
                         viewModel.registrarAlimentoDesdeDialogo(
                             idAlimento = alimentoSeleccionado!!.idAlimento,
                             cantidad = cantidad,
@@ -393,11 +481,11 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
                         cantidadTexto = ""
                         unidadTexto = ""
 
-                        // Notificación y recarga automática
+                        // Notificación y recarga
                         Toast.makeText(contexto, "Alimento registrado con éxito", Toast.LENGTH_SHORT).show()
                         viewModel.cargarComidasRecientes()
                     } else {
-                        Toast.makeText(contexto, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(contexto, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
                     }
                 }
             ) {
@@ -413,7 +501,6 @@ fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
         }
     )
 }
-
 
 @Composable
 fun MostrarError(viewModel: BuscarAlimentoViewModel) {

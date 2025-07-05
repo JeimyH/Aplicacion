@@ -1,5 +1,6 @@
 package com.example.frontendproyectoapp.repository
 
+import android.util.Log
 import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
 import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimentoReciente
 import com.example.frontendproyectoapp.interfaces.RetrofitClientRegistroAlimento
@@ -7,6 +8,7 @@ import com.example.frontendproyectoapp.model.Alimento
 import com.example.frontendproyectoapp.model.AlimentoReciente
 import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
+import retrofit2.Response
 
 class BuscarAlimentoRepository {
     private val alimentoService = RetrofitClientAlimento.alimentoService
@@ -49,6 +51,18 @@ class BuscarAlimentoRepository {
 
     suspend fun obtenerComidasRecientes(idUsuario: Long): List<RegistroAlimentoSalida> {
         return RetrofitClientRegistroAlimento.registroAlimentoService.obtenerComidasRecientes(idUsuario)
+    }
+
+    suspend fun eliminarRegistrosPorFechaYMomento(idUsuario: Long, fecha: String, momento: String): Response<Unit> {
+        Log.d("RegistroRepo", "→ Enviando request DELETE con: idUsuario=$idUsuario, fecha=$fecha, momento=$momento")
+        return RetrofitClientRegistroAlimento.registroAlimentoService
+            .eliminarPorFechaYMomento(idUsuario, momento, fecha) // orden correcto de los @Path
+    }
+
+
+    suspend fun eliminarRegistroPorId(idRegistro: Long) {
+        val response = RetrofitClientRegistroAlimento.registroAlimentoService.eliminarRegistroPorId(idRegistro)
+        if (!response.isSuccessful) throw Exception("No se pudo eliminar el registro")
     }
 
 }

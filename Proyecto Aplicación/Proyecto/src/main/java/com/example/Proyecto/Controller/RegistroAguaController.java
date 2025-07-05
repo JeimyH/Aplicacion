@@ -3,7 +3,6 @@ package com.example.Proyecto.Controller;
 import com.example.Proyecto.DTO.RegistroAguaEntradaDTO;
 import com.example.Proyecto.DTO.RegistroAguaRespuestaDTO;
 import com.example.Proyecto.Model.RegistroAgua;
-import com.example.Proyecto.Repository.UsuarioRepository;
 import com.example.Proyecto.Service.RegistroAguaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -111,4 +110,11 @@ public class RegistroAguaController {
 
         return ResponseEntity.ok(dto);
     }
+
+    @DeleteMapping("/eliminar/{idUsuario}/hoy")
+    public ResponseEntity<Void> eliminarRegistroDeHoy(@PathVariable Long idUsuario) {
+        registroAguaService.eliminarRegistroDeHoy(idUsuario);
+        return ResponseEntity.noContent().build();
+    }
+
 }
