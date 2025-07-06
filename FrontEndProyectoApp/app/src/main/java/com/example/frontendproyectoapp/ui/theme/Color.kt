@@ -4,13 +4,14 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 
 // Colores personalizados para DietaSmart
-val PastelMint = Color(0xFFA8D5BA)       // Primario
-val PastelPeach = Color(0xFFFFC8A2)      // Secundario
-val PastelYellow = Color(0xFFFFF4B1)     // Acento
-val PastelBackground = Color(0xFFFFFDF7) // Fondo
-val SurfaceLight = Color(0xFFF3F3F3)     // Superficie
-val TextOlive = Color(0xFF5E716A)        // Texto oscuro
-val PastelError = Color(0xFFF8B5B1)      // Error o advertencias
+val PastelMint = Color(0xFFA8D5BA)       // Primario: Verde menta suave
+val PastelLeaf = Color(0xFFC7E9C0)       // Verde hoja pálido
+val PastelYellow = Color(0xFFF1F8A0)     // Acento amarillo pastel
+val PastelBackground = Color(0xFFF2FBF2) // Fondo claro verdoso
+val PastelWhite = Color(0xFFFFFFFF)      // Blanco neutro
+val TextOlive = Color(0xFF5E716A)        // Texto principal verde oliva
+val TextGray = Color(0xFF8A8A8A)         // Texto gris medio
+val PastelError = Color(0xFFF8B5B1)      // Color de error o advertencia (rosado pastel)
 
 // Colores para puntos de actividad en el calendario
 val DotAgua = Color(0xFF9ED0F5)    // Azul pastel agua

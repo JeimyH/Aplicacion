@@ -1,6 +1,13 @@
 package com.example.frontendproyectoapp.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -32,15 +39,21 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,11 +73,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.frontendproyectoapp.ui.theme.TextOlive
 import com.example.frontendproyectoapp.ui.theme.dotAgua
 import com.example.frontendproyectoapp.ui.theme.dotAmbos
 import com.example.frontendproyectoapp.ui.theme.dotComida
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -79,8 +95,14 @@ fun NutrientRow(nombre: String, consumido: Int, recomendado: Int) {
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(nombre)
-        Text("$consumido / $recomendado g")
+        Text(
+            nombre,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            "$consumido / $recomendado g",
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
@@ -101,16 +123,24 @@ fun BottomNavigationBar(navController: NavHostController) {
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         items.forEach { item ->
+            val selected = currentDestination == item.route
+
             NavigationBarItem(
                 icon = {
-                    Icon(imageVector = item.icon, contentDescription = item.label)
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.label
+                    )
                 },
                 label = {
-                    Text(text = item.label, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        text = item.label,
+                        style = MaterialTheme.typography.labelSmall
+                    )
                 },
-                selected = currentDestination == item.route,
+                selected = selected,
                 onClick = {
-                    if (currentDestination != item.route) {
+                    if (!selected) {
                         navController.navigate(item.route) {
                             launchSingleTop = true
                             restoreState = true
@@ -120,7 +150,14 @@ fun BottomNavigationBar(navController: NavHostController) {
                         }
                     }
                 },
-                alwaysShowLabel = true
+                alwaysShowLabel = true,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary // ← Fondo del ítem activo
+                )
             )
         }
     }
@@ -131,7 +168,6 @@ data class BottomNavItem(
     val icon: ImageVector,
     val label: String
 )
-
 
 @Composable
 fun DropdownSelector(
@@ -150,14 +186,29 @@ fun DropdownSelector(
             value = selected,
             onValueChange = {},
             readOnly = true,
-            label = { Text(label) },
+            label = {
+                Text(
+                    text = label,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
             trailingIcon = {
                 Icon(
-                    Icons.Default.ArrowDropDown,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onExpandedChange(!expanded) }
                 )
             },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
@@ -170,10 +221,16 @@ fun DropdownSelector(
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier
                 .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = {
+                        Text(
+                            option,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
                     onClick = { onItemSelected(option) }
                 )
             }
@@ -183,13 +240,50 @@ fun DropdownSelector(
 
 @Composable
 fun CaloriasGraph(caloriasMin: Int, caloriasMax: Int) {
+    val caloriasProm = (caloriasMin + caloriasMax) / 2
+    val graphColor = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.onBackground
+
+    // 🔹 Estados animados personalizados
+    var animatedMin by remember { mutableIntStateOf(0) }
+    var animatedProm by remember { mutableIntStateOf(0) }
+    var animatedMax by remember { mutableIntStateOf(0) }
+
+    val animatedProgress by rememberInfiniteTransition(label = "graphAnim")
+        .animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1600, easing = LinearOutSlowInEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "animatedLine"
+        )
+
+    // 🔹 Iniciar animación una vez (de 0 hasta el valor final)
+    LaunchedEffect(Unit) {
+        val duration = 1000
+        val steps = 60
+        val delayPerFrame = duration / steps
+
+        repeat(steps + 1) { frame ->
+            val fraction = frame / steps.toFloat()
+            animatedMin = (caloriasMin * fraction).toInt()
+            animatedProm = (caloriasProm * fraction).toInt()
+            animatedMax = (caloriasMax * fraction).toInt()
+            delay(delayPerFrame.toLong())
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Canvas(modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        ) {
             val width = size.width
             val height = size.height
 
@@ -197,51 +291,78 @@ fun CaloriasGraph(caloriasMin: Int, caloriasMax: Int) {
             val end = Offset(x = width * 0.8f, y = height * 0.8f)
             val peak = Offset(x = width * 0.5f, y = height * 0.2f)
 
-            val path = Path().apply {
+            val animatedX = start.x + (end.x - start.x) * animatedProgress
+
+            val animatedPath = Path().apply {
                 moveTo(start.x, start.y)
-                quadraticTo(peak.x, peak.y, end.x, end.y)
+
+                if (animatedX <= peak.x) {
+                    val t = (animatedX - start.x) / (peak.x - start.x)
+                    val y = lerp(start.y, peak.y, t)
+                    quadraticTo(
+                        start.x + (peak.x - start.x) * 0.5f,
+                        lerp(start.y, peak.y, 0.5f),
+                        animatedX,
+                        y
+                    )
+                } else {
+                    quadraticTo(
+                        peak.x,
+                        peak.y,
+                        animatedX,
+                        lerp(peak.y, end.y, (animatedX - peak.x) / (end.x - peak.x))
+                    )
+                }
             }
 
             drawPath(
-                path = path,
-                color = Color.Black,
+                path = animatedPath,
+                color = graphColor,
                 style = Stroke(width = 4f, cap = StrokeCap.Round, join = StrokeJoin.Round)
             )
 
-            // Línea vertical en inicio (mínimo)
+            drawCircle(color = graphColor, radius = 6f, center = start)
+            drawCircle(color = graphColor, radius = 6f, center = end)
+
             drawLine(
-                color = Color.Black,
+                color = graphColor,
                 start = Offset(start.x, start.y),
                 end = Offset(start.x, start.y - 20),
-                strokeWidth = 4f
+                strokeWidth = 3f
             )
-
-            // Línea vertical en final (máximo)
             drawLine(
-                color = Color.Black,
+                color = graphColor,
                 start = Offset(end.x, end.y),
                 end = Offset(end.x, end.y - 20),
-                strokeWidth = 4f
+                strokeWidth = 3f
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // 🔹 Valores sincronizados con la animación
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Mínimo", fontWeight = FontWeight.Medium)
-                Text("$caloriasMin kcal", fontSize = 14.sp)
+                Text("Mínimo", style = MaterialTheme.typography.labelMedium, color = textColor)
+                Text("${animatedMin} kcal", style = MaterialTheme.typography.bodySmall, color = textColor)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Máximo", fontWeight = FontWeight.Medium)
-                Text("$caloriasMax kcal", fontSize = 14.sp)
+                Text("Promedio", style = MaterialTheme.typography.labelMedium, color = textColor)
+                Text("${animatedProm} kcal", style = MaterialTheme.typography.bodySmall, color = textColor)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Máximo", style = MaterialTheme.typography.labelMedium, color = textColor)
+                Text("${animatedMax} kcal", style = MaterialTheme.typography.bodySmall, color = textColor)
             }
         }
     }
 }
+
 
 @Composable
 fun CustomCalendar(

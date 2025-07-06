@@ -15,6 +15,12 @@ import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.repository.UsuarioRepository
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 
 class UsuarioViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
@@ -78,6 +84,41 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             alimentosFavoritos.removeIf { it.idAlimento == alimento.idAlimento }
         } else {
             alimentosFavoritos.add(alimento)
+        }
+    }
+
+    fun calcularRangoPesoNormal(alturaCm: Float): Pair<Int, Int> {
+        val alturaM = alturaCm / 100f
+        val pesoMin = 18.5 * (alturaM * alturaM)
+        val pesoMax = 24.9 * (alturaM * alturaM)
+        return Pair(pesoMin.toInt(), pesoMax.toInt())
+    }
+
+    fun calcularEdadCalendario(fechaNacimiento: String): Int {
+        return try {
+            val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val fecha = formato.parse(fechaNacimiento)
+            val dob = Calendar.getInstance().apply { time = fecha!! }
+            val hoy = Calendar.getInstance()
+
+            var edad = hoy.get(Calendar.YEAR) - dob.get(Calendar.YEAR)
+            if (hoy.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+                edad--
+            }
+            edad
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    fun calcularEdadReg6(fechaNacimiento: String): Int {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val fecha = LocalDate.parse(fechaNacimiento, formatter)
+            val hoy = LocalDate.now()
+            Period.between(fecha, hoy).years
+        } catch (e: Exception) {
+            25 // edad por defecto en caso de error
         }
     }
 

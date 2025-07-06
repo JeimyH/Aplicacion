@@ -48,9 +48,7 @@ fun InicioScreenContent(
 
     val context = LocalContext.current
     val idUsuarioFlow = produceState<Long?>(initialValue = null) {
-        UserPreferences.obtenerIdUsuario(context).collect {
-            value = it
-        }
+        UserPreferences.obtenerIdUsuario(context).collect { value = it }
     }
 
     val cantidadVasos = 8
@@ -59,7 +57,7 @@ fun InicioScreenContent(
     val diasConActividad = viewModel.diasConActividad
 
     val colorSeleccionado = MaterialTheme.colorScheme.primary
-    val colorNoSeleccionado = MaterialTheme.colorScheme.surfaceVariant
+    val colorNoSeleccionado = MaterialTheme.colorScheme.surface
     val iconTintSeleccionado = MaterialTheme.colorScheme.onPrimary
     val iconTintNoSeleccionado = MaterialTheme.colorScheme.onSurface
 
@@ -69,14 +67,14 @@ fun InicioScreenContent(
         .groupBy { LocalDate.parse(it.fecha) }
         .mapValues { it.value.map { it.tipo }.toSet() }
 
-    // Cargar los datos del usuario cuando cambia
+    // Cargar datos del usuario
     LaunchedEffect(idUsuarioFlow.value) {
         viewModel.establecerIdUsuario(idUsuarioFlow.value)
         viewModel.cargarDatosUsuarioActual(idUsuarioFlow.value)
         viewModel.cargarDiasConActividad()
     }
 
-    // Mostrar mensaje desde el ViewModel
+    // Mostrar snackbar de mensaje
     LaunchedEffect(Unit) {
         viewModel.mensajeUI.collect { mensaje ->
             snackbarHostState.showSnackbar(mensaje)
@@ -86,9 +84,7 @@ fun InicioScreenContent(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            BottomNavigationBar(navController)
-        }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -98,7 +94,8 @@ fun InicioScreenContent(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Ajustes
+
+            // Botón ajustes
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,7 +104,7 @@ fun InicioScreenContent(
             ) {
                 IconButton(onClick = { navController.navigate("ajustes") }) {
                     Icon(
-                        Icons.Default.Settings,
+                        imageVector = Icons.Default.Settings,
                         contentDescription = "Ir a ajustes",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
@@ -123,7 +120,7 @@ fun InicioScreenContent(
                 diasConActividad = diasConActividadMap
             )
 
-            //LeyendaCalendario()
+            // Leyenda de calendario
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -138,10 +135,15 @@ fun InicioScreenContent(
                     )
                 }
             }
-            LeyendaActividadCalendario(expandido = mostrarLeyenda, onDismiss = { mostrarLeyenda = false })
+
+            LeyendaActividadCalendario(
+                expandido = mostrarLeyenda,
+                onDismiss = { mostrarLeyenda = false }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Texto calorías
             Text(
                 "Calorías Totales / Calorías Recomendadas",
                 style = MaterialTheme.typography.bodyMedium,
@@ -175,8 +177,9 @@ fun InicioScreenContent(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Grilla de vasos
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier
@@ -210,14 +213,16 @@ fun InicioScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // Total de agua
             Text(
                 "Total consumido: ${vasosConsumidos * 250} ml",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            // Cargando...
             if (estadoCarga) {
                 CircularProgressIndicator(
                     Modifier.padding(top = 16.dp),
@@ -227,6 +232,7 @@ fun InicioScreenContent(
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

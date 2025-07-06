@@ -19,11 +19,15 @@ import com.example.frontendproyectoapp.screen.RegistroVent6Screen
 import com.example.frontendproyectoapp.screen.RegistroVent7Screen
 import com.example.frontendproyectoapp.screen.RegistroVent8Screen
 import com.example.frontendproyectoapp.screen.RegistroVent9Screen
+import com.example.frontendproyectoapp.screen.SplashScreen
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController, viewModel: UsuarioViewModel) {
-    NavHost(navController = navController, startDestination = "registro1") {
+    NavHost(navController = navController, startDestination = "splash") {
+        composable("splash") { SplashScreen(navController)}
+
+        // --- Registro paso a paso ---
         composable("registro1") { RegistroVent1Screen(navController) }
         composable("registro2") { RegistroVent2Screen(navController, viewModel) }
         composable("registro3") { RegistroVent3Screen(navController, viewModel) }
@@ -33,6 +37,8 @@ fun AppNavigation(navController: NavHostController, viewModel: UsuarioViewModel)
         composable("registro7") { RegistroVent7Screen(navController) }
         composable("registro8") { RegistroVent8Screen(navController, viewModel) }
         composable("registro9") { RegistroVent9Screen(navController, viewModel) }
+
+        // --- Navegación principal ---
         composable("inicio") { InicioScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("buscarAlimentos") {BuscarAlimentoScreen(navController)}
@@ -40,6 +46,7 @@ fun AppNavigation(navController: NavHostController, viewModel: UsuarioViewModel)
         //composable("rutina") {RutinaScreen(navController)}
         //composable("estadisticas") {Estadisticas(navController)}
         composable("ajustes") { AjustesScreen(navController)}
+
         composable("detalleAlimento/{idAlimento}") { backStackEntry ->
             val idAlimento = backStackEntry.arguments?.getString("idAlimento")?.toLongOrNull()
             if (idAlimento != null) {
