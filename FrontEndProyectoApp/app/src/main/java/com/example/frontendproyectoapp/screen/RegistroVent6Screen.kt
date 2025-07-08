@@ -195,8 +195,6 @@ fun RegistroVent6ScreenContent(
     }
 }
 
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun RegistroVent6ScreenPreview(viewModel: UsuarioViewModel = viewModel()) {

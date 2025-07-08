@@ -1,6 +1,7 @@
 package com.example.frontendproyectoapp.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -9,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun RegistroVent9Screen(navController: NavController, viewModel: UsuarioViewModel) {
@@ -56,29 +55,57 @@ fun RegistroVent9ScreenContent(
             onDismissRequest = {},
             title = { Text("Creando cuenta") },
             text = { Text("Espera un momento...") },
-            confirmButton = { CircularProgressIndicator(modifier = Modifier.padding(16.dp)) }
+            confirmButton = {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         )
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
 
+            // Barra de progreso
+            LinearProgressIndicator(
+                progress = 6 / 6f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            // Botón de retroceso
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             Column(
-                modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Nombre de usuario
+                // Campo: Nombre
                 OutlinedTextField(
                     value = viewModel.nombre,
                     onValueChange = {
@@ -89,13 +116,14 @@ fun RegistroVent9ScreenContent(
                     label = { Text("Nombre de Usuario") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 viewModel.nombreValidationError?.let {
-                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                 }
 
-                // Correo
+                // Campo: Correo
                 OutlinedTextField(
                     value = viewModel.correo,
                     onValueChange = {
@@ -106,20 +134,23 @@ fun RegistroVent9ScreenContent(
                     label = { Text("Correo") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 viewModel.correoValidationError?.let {
-                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                 }
 
-                // Contraseña
+                // Campo: Contraseña
                 OutlinedTextField(
                     value = viewModel.contrasena,
                     onValueChange = {
                         viewModel.contrasena = it
                         viewModel.contrasenaValidationError = viewModel.validatePassword(it)
-                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(viewModel.confirmarContrasena, it)
+                        viewModel.confirmarContrasenaValidationError =
+                            viewModel.validateConfirmPassword(viewModel.confirmarContrasena, it)
                     },
+                    isError = viewModel.contrasenaValidationError != null,
                     label = { Text("Contraseña") },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
@@ -130,22 +161,24 @@ fun RegistroVent9ScreenContent(
                             )
                         }
                     },
-                    isError = viewModel.contrasenaValidationError != null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 viewModel.contrasenaValidationError?.let {
-                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                 }
 
-                // Confirmar Contraseña
+                // Campo: Confirmar Contraseña
                 OutlinedTextField(
                     value = viewModel.confirmarContrasena,
                     onValueChange = {
                         viewModel.confirmarContrasena = it
-                        viewModel.confirmarContrasenaValidationError = viewModel.validateConfirmPassword(viewModel.contrasena, it)
+                        viewModel.confirmarContrasenaValidationError =
+                            viewModel.validateConfirmPassword(viewModel.contrasena, it)
                     },
+                    isError = viewModel.confirmarContrasenaValidationError != null,
                     label = { Text("Confirmar Contraseña") },
                     visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
@@ -156,16 +189,16 @@ fun RegistroVent9ScreenContent(
                             )
                         }
                     },
-                    isError = viewModel.confirmarContrasenaValidationError != null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 viewModel.confirmarContrasenaValidationError?.let {
-                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+                    Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
                     onClick = {
@@ -183,14 +216,20 @@ fun RegistroVent9ScreenContent(
                     enabled = !viewModel.cargando,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
-                    Text("Registrarse")
+                    Text("Registrarse", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

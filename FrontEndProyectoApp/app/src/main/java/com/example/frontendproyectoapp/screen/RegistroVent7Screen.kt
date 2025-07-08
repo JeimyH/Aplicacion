@@ -3,6 +3,7 @@ package com.example.frontendproyectoapp.screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,13 +28,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -59,70 +64,86 @@ fun RegistroVent7ScreenContent(
             .build()
     )
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
-        // Botón atrás
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.align(Alignment.TopStart)
-        ) {
+        Box(modifier = Modifier.weight(1f)) {
+            // Botón atrás
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Volver",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // Contenido principal centrado
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Imagen circular con borde y sombra
-            Box(
+                contentDescription = "Atrás",
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .size(280.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .shadow(8.dp, CircleShape),
-                contentAlignment = Alignment.Center
+                    .align(Alignment.TopStart)
+                    .padding(top = 14.dp)
+                    .clickable { onBackClick() }
+            )
+
+            // Contenido principal centrado y scrollable
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 56.dp, bottom = 80.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = imagePainter,
-                    contentDescription = "Logo Screen6",
-                    contentScale = ContentScale.Crop,
+                // Imagen central redonda con sombra
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(280.dp)
                         .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .shadow(8.dp, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = imagePainter,
+                        contentDescription = "Imagen de rutina",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("¡Excelente! ")
+                        }
+                        append("Ahora vamos a personalizar tu rutina de comidas.")
+                    },
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                )
+
+                Text(
+                    text = "Esto nos ayudará a distribuir tus calorías diarias de forma inteligente.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Continuemos, ahora personalizaremos tu rutina de comidas para alcanzar tus calorías diarias",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
         }
 
         // Botón continuar
         Button(
             onClick = onClick,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.CenterHorizontally)
                 .fillMaxWidth()
-                .height(50.dp)
-                .padding(bottom = 16.dp),
+                .padding(horizontal = 8.dp, vertical = 16.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

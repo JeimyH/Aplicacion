@@ -27,9 +27,7 @@ import com.example.frontendproyectoapp.viewModel.LoginViewModelFactory
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(
-    navController: NavController,
-) {
+fun LoginScreen(navController: NavController) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel(
         factory = LoginViewModelFactory(context.applicationContext as Application)
@@ -38,7 +36,6 @@ fun LoginScreen(
     LoginScreenContent(
         viewModel = viewModel,
         onLoginClick = {
-            // Solo intenta loguear si el correo es válido
             val correoValido = viewModel.validateCorreo(viewModel.correo) == null
             if (correoValido) {
                 viewModel.login(viewModel.correo, viewModel.contrasena)
@@ -48,7 +45,6 @@ fun LoginScreen(
             navController.popBackStack()
         },
         onSuccess = {
-            // Navega a la pantalla de inicio si el login fue exitoso
             navController.navigate("inicio") {
                 popUpTo("login") { inclusive = true }
             }
@@ -56,7 +52,6 @@ fun LoginScreen(
         }
     )
 }
-
 
 @Composable
 fun LoginScreenContent(
@@ -76,12 +71,12 @@ fun LoginScreenContent(
 
     var passwordVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(viewModel.uiState.value) {
-        when (val state = viewModel.uiState.value) {
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
             is LoginUiState.Success -> onSuccess()
             is LoginUiState.Error -> {
                 snackbarHostState.showSnackbar(
-                    message = state.message, // <-- Aquí se hace cast explícito
+                    message = state.message,
                     duration = SnackbarDuration.Short
                 )
             }
@@ -90,119 +85,148 @@ fun LoginScreenContent(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(paddingValues)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "Bienvenido de nuevo",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-            )
-            Text(
-                text = "Inicia sesión con tu cuenta de DIETASMART",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OutlinedTextField(
-                value = correo,
-                onValueChange = { viewModel.onCorreoChanged(it) },
-                label = { Text("Correo") },
-                isError = correoValidationError != null,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
+            IconButton(
+                onClick = onBackClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(20.dp)
-            )
-            if (correoValidationError != null) {
-                Text(
-                    text = correoValidationError ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.align(Alignment.Start)
+                    .align(Alignment.TopStart)
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
-            OutlinedTextField(
-                value = contrasena,
-                onValueChange = { viewModel.onContrasenaChanged(it) },
-                label = { Text("Contraseña") },
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                trailingIcon = {
-                    val icon = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = icon, contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña")
-                    }
-                },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(20.dp)
-            )
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Bienvenido de nuevo",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Inicia sesión con tu cuenta de DietaSmart",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            Button(
-                enabled = uiState != LoginUiState.Loading,
-                onClick = {
-                    if (correoValidationError == null) {
-                        onLoginClick()
-                    } else {
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Por favor, ingresa un correo válido.",
-                                duration = SnackbarDuration.Short
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Campo Correo
+                OutlinedTextField(
+                    value = correo,
+                    onValueChange = { viewModel.onCorreoChanged(it) },
+                    label = { Text("Correo") },
+                    isError = correoValidationError != null,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                correoValidationError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+                }
+
+                // Campo Contraseña
+                OutlinedTextField(
+                    value = contrasena,
+                    onValueChange = { viewModel.onContrasenaChanged(it) },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible)
+                                    Icons.Default.VisibilityOff
+                                else
+                                    Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible)
+                                    "Ocultar contraseña" else "Mostrar contraseña"
                             )
                         }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                if (uiState == LoginUiState.Loading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Botón Iniciar sesión
+                Button(
+                    onClick = {
+                        if (correoValidationError == null) {
+                            onLoginClick()
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    "Por favor, ingresa un correo válido.",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
+                    },
+                    enabled = uiState != LoginUiState.Loading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
-                } else {
-                    Text("Iniciar sesión")
+                ) {
+                    if (uiState == LoginUiState.Loading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Iniciar sesión", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            TextButton(onClick = {
-                // Aquí puedes navegar a una pantalla de recuperación de contraseña
-            }) {
-                Text("¿Olvidaste tu contraseña?")
+                TextButton(onClick = {
+                    // Aquí puedes navegar a recuperación de contraseña
+                }) {
+                    Text(
+                        "¿Olvidaste tu contraseña?",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

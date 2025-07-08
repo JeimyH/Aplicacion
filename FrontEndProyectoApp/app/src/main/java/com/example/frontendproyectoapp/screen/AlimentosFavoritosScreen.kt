@@ -8,8 +8,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,13 +31,12 @@ fun AlimentosFavoritosScreen(navController: NavHostController) {
     AlimentosFavoritosScreenContent(viewModel = viewModel, navController = navController)
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlimentosFavoritosScreenContent(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
     val context = LocalContext.current
 
-    // Cargar favoritos al entrar a la pantalla
+    // Cargar favoritos al abrir
     LaunchedEffect(Unit) {
         viewModel.cargarDatos()
     }
@@ -43,24 +44,49 @@ fun AlimentosFavoritosScreenContent(viewModel: BuscarAlimentoViewModel, navContr
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text("Alimentos Favoritos") },
+                title = {
+                    Text(
+                        "Alimentos Favoritos",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { paddingValues ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             if (viewModel.favoritos.isEmpty()) {
                 item {
-                    Text("No tienes alimentos favoritos aún.")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "No tienes alimentos favoritos aún.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else {
                 items(viewModel.favoritos) { alimento ->
@@ -80,10 +106,8 @@ fun AlimentosFavoritosScreenContent(viewModel: BuscarAlimentoViewModel, navContr
                 }
             }
         }
-
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

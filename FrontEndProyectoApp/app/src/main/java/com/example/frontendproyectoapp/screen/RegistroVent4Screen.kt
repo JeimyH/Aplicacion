@@ -67,7 +67,7 @@ fun RegistroVent4ScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
-        // Barra de progreso superior (paso 4 de 6)
+        // Barra de progreso superior 3/6
         LinearProgressIndicator(
             progress = 3 / 6f,
             modifier = Modifier

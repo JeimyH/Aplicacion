@@ -26,6 +26,13 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     private val context = application.applicationContext
     private val repositoryUsuario = UsuarioRepository()
 
+    // 🔸 Mapa para llevar el conteo por categoría
+    private val _favoritosPorCategoria = mutableStateMapOf<String, MutableList<Alimento>>()
+    val favoritosPorCategoria = mutableStateMapOf<String, List<Alimento>>()
+
+    // 🔸 Límite máximo por categoría
+    private val LIMITE_POR_CATEGORIA = 3
+
     // LiveData
     private val _usuarios = MutableLiveData<List<Usuario>>(emptyList())
     val usuarios: LiveData<List<Usuario>> = _usuarios
@@ -177,6 +184,9 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     registroExitoso = true
                     UserPreferences.guardarIdUsuario(context, usuarioRespuesta.idUsuario)
 
+                    // 🔹 Consolidar favoritos por categoría antes de guardar
+                    consolidarFavoritosPorCategoria()
+
                     try {
                         kotlinx.coroutines.coroutineScope {
                             alimentosFavoritos.map { alimento ->
@@ -207,6 +217,27 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
             )
         }
     }
+
+    fun toggleFavoritoConLimite(alimento: Alimento, categoria: String) {
+        val actuales = favoritosPorCategoria[categoria]?.toMutableList() ?: mutableListOf()
+
+        if (actuales.any { it.idAlimento == alimento.idAlimento }) {
+            actuales.removeAll { it.idAlimento == alimento.idAlimento }
+        } else {
+            if (actuales.size < 3) {
+                actuales.add(alimento)
+            }
+        }
+        favoritosPorCategoria[categoria] = actuales.toList()
+    }
+
+    fun consolidarFavoritosPorCategoria() {
+        alimentosFavoritos.clear()
+        favoritosPorCategoria.values.flatten().distinctBy { it.idAlimento }.forEach {
+            alimentosFavoritos.add(it)
+        }
+    }
+
 
 }
 
