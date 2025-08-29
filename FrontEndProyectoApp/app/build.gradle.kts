@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.foundation.layout.android)
 
+
     // Retrofit
     implementation(libs.retrofit) // Retrofit
     implementation(libs.retrofit.converter.gson) // Retrofit Converter Gson
@@ -88,4 +89,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.mpandroidchart)
+
+    implementation ("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
+
 }

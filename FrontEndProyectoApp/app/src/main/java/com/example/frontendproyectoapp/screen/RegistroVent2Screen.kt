@@ -11,14 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -32,10 +36,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
@@ -73,11 +85,10 @@ fun RegistroVent2ScreenContent(
     var mostrarAdvertenciaEdad by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    var fechaNacimiento by remember {
-        mutableStateOf(viewModel.fechaNacimiento.ifEmpty { "" })
-    }
+    var fechaNacimiento by remember { mutableStateOf(viewModel.fechaNacimiento.ifEmpty { "" }) }
 
-    val camposValidos = sexo.isNotBlank() && altura.isNotBlank() && peso.isNotBlank() && fechaNacimiento.isNotBlank() && edadUsuario >= 18
+    val camposValidos = sexo.isNotBlank() && altura.isNotBlank() && peso.isNotBlank() &&
+            fechaNacimiento.isNotBlank() && edadUsuario >= 18
 
     val calendar = Calendar.getInstance()
     val datePickerDialog = DatePickerDialog(
@@ -105,18 +116,21 @@ fun RegistroVent2ScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
-        // Progreso paso 1 de 6
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Barra de progreso
         LinearProgressIndicator(
-            progress = 1 / 6f,
+            progress = 1 / 7f,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp),
+                .height(6.dp)
+                .clip(RoundedCornerShape(4.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
 
         Box(modifier = Modifier.weight(1f)) {
-            // Icono de volver
+            // Icono volver
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Atrás",
@@ -127,7 +141,7 @@ fun RegistroVent2ScreenContent(
                     .clickable { onBackClick() }
             )
 
-            // Contenido con scroll
+            // Contenido principal
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -135,15 +149,17 @@ fun RegistroVent2ScreenContent(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Título principal
                 Text(
                     "Cuéntanos sobre ti",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
                 // GÉNERO
-                DropdownSelector(
+                DropdownSelectorReg(
                     label = "Género",
                     selected = if (sexo.isBlank()) "Selecciona tu género" else sexo,
                     options = sexos,
@@ -159,7 +175,11 @@ fun RegistroVent2ScreenContent(
                         .padding(vertical = 8.dp)
                 )
                 if (sexo.isBlank()) {
-                    Text("Campo obligatorio", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        "Campo obligatorio",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+                    )
                 }
 
                 // FECHA DE NACIMIENTO
@@ -167,16 +187,26 @@ fun RegistroVent2ScreenContent(
                     value = if (fechaNacimiento.isBlank()) "Selecciona tu fecha de nacimiento" else fechaNacimiento,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Fecha de nacimiento", color = MaterialTheme.colorScheme.onBackground) },
+                    label = {
+                        Text(
+                            "Fecha de nacimiento",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     trailingIcon = {
                         IconButton(onClick = { datePickerDialog.show() }) {
-                            Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                Icons.Default.DateRange,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     },
                     isError = mostrarAdvertenciaEdad,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                         errorContainerColor = MaterialTheme.colorScheme.surface,
@@ -196,8 +226,10 @@ fun RegistroVent2ScreenContent(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(2.dp))
+
                 // ALTURA
-                DropdownSelector(
+                DropdownSelectorReg(
                     label = "Altura",
                     selected = if (altura.isBlank()) "Selecciona tu altura" else altura,
                     options = alturas,
@@ -213,11 +245,15 @@ fun RegistroVent2ScreenContent(
                         .padding(vertical = 8.dp)
                 )
                 if (altura.isBlank()) {
-                    Text("Campo obligatorio", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        "Campo obligatorio",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+                    )
                 }
 
                 // PESO
-                DropdownSelector(
+                DropdownSelectorReg(
                     label = "Peso",
                     selected = if (peso.isBlank()) "Selecciona tu peso" else peso,
                     options = pesos,
@@ -233,14 +269,18 @@ fun RegistroVent2ScreenContent(
                         .padding(vertical = 8.dp)
                 )
                 if (peso.isBlank()) {
-                    Text("Campo obligatorio", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        "Campo obligatorio",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }
 
-        // 🔹 Botón continuar con animación
+        // Botón continuar
         Button(
             onClick = {
                 if (camposValidos) onContinuarClick()
@@ -257,9 +297,86 @@ fun RegistroVent2ScreenContent(
                 disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                 disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
             ),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Continuar", style = MaterialTheme.typography.labelLarge)
+            Text(
+                "Continuar",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+    }
+}
+
+@Composable
+fun DropdownSelectorReg(
+    label: String,
+    selected: String,
+    options: List<String>,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onItemSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = selected,
+            onValueChange = {},
+            readOnly = true,
+            label = {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 13.sp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onExpandedChange(!expanded) }
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    textFieldSize = coordinates.size
+                }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier
+                .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            option,
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 15.sp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    onClick = { onItemSelected(option) }
+                )
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.frontendproyectoapp.model.UserPreferences
+import com.example.frontendproyectoapp.DataStores.UserPreferences
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
 import com.example.frontendproyectoapp.repository.UsuarioRepository
 import kotlinx.coroutines.launch
@@ -63,8 +63,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             result.fold(
                 onSuccess = { usuario ->
-                    UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
-                    Log.d("LoginViewModel", "ID de usuario guardado: ${usuario.idUsuario}")
+                    // Guardar sesión en DataStore
+                    viewModelScope.launch {
+                        UserPreferences.guardarIdUsuario(context, usuario.idUsuario)
+                        UserPreferences.guardarCorreoUsuario(context, usuario.correo)
+                        UserPreferences.guardarSesion(context, true)
+                    }
+                    Log.d("LoginViewModel", "Usuario guardado en DataStore: ${usuario.idUsuario}")
+
                     _uiState.value = LoginUiState.Success(usuario)
                 },
                 onFailure = {
@@ -77,6 +83,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     _uiState.value = LoginUiState.Error(errorMessage)
                 }
             )
+        }
+    }
+
+    // 🔹 Cerrar sesión
+    fun logout() {
+        viewModelScope.launch {
+            UserPreferences.limpiarDatos(context)
+            Log.d("LoginViewModel", "Sesión cerrada, datos borrados")
+            _uiState.value = LoginUiState.Idle
         }
     }
 

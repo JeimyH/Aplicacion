@@ -28,4 +28,5 @@ public interface EstadisticasNutricionalesRepository extends JpaRepository<Estad
     // Obtener total de comidas registradas
     @Query(value = "SELECT totalComidas FROM EstadisticasNutricionales WHERE idUsuario = :idUsuario AND fecha = :fecha", nativeQuery = true)
     Integer obtenerTotalComidasRegistradas(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha);
+
 }

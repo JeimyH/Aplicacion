@@ -7,12 +7,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NutrientesTotalesDTO {
-    private float calorias;
-    private float proteinas;
-    private float carbohidratos;
-    private float grasas;
-    private float azucares;
-    private float fibra;
-    private float sodio;
-    private float grasasSaturadas;
+    private Float calorias;
+    private Float proteinas;
+    private Float carbohidratos;
+    private Float grasas;
+    private Float azucares;
+    private Float fibra;
+    private Float sodio;
+    private Float grasasSaturadas;
 }

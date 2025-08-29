@@ -2,15 +2,12 @@ package com.example.frontendproyectoapp.screen
 
 import androidx.compose.foundation.Image
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -27,14 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,16 +39,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.frontendproyectoapp.model.Alimento
-import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
-import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModel
-import com.example.frontendproyectoapp.viewModel.BuscarAlimentoViewModelFactory
+import com.example.frontendproyectoapp.viewModel.AlimentoViewModel
+import com.example.frontendproyectoapp.viewModel.AlimentoViewModelFactory
 
 // Pantalla principal de búsqueda de alimentos
 @Composable
 fun BuscarAlimentoScreen(navController: NavHostController) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
-    val viewModel: BuscarAlimentoViewModel = viewModel(factory = BuscarAlimentoViewModelFactory(application))
+    val viewModel: AlimentoViewModel = viewModel(factory = AlimentoViewModelFactory(application))
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val lifecycle = currentBackStackEntry?.lifecycle
@@ -74,7 +66,7 @@ fun BuscarAlimentoScreen(navController: NavHostController) {
 }
 
 @Composable
-fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
+fun BuscarAlimentoScreenContent(viewModel: AlimentoViewModel, navController: NavHostController) {
     val mostrarBaseDatos = remember { mutableStateOf(false) }
     val isSearchFocused = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -92,9 +84,24 @@ fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navControlle
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
-                ) { focusManager.clearFocus() },
-            horizontalAlignment = Alignment.CenterHorizontally
+                ) { focusManager.clearFocus() }
         ) {
+            Text(
+                "Alimentos",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 8.dp),
+                //textAlign = Alignment.Start
+            )
+
+            Divider(
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Búsqueda
             BarraBusqueda(viewModel, mostrarBaseDatos, isSearchFocused)
 
@@ -107,7 +114,7 @@ fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navControlle
 
             // Contenido
             when {
-                viewModel.errorCarga != null -> MostrarError(viewModel)
+                viewModel.errorCarga != null -> MostrarErrorBuscar(viewModel)
                 viewModel.busqueda.isNotBlank() && isSearchFocused.value -> MostrarResultadosBusqueda(
                     viewModel,
                     navController
@@ -116,7 +123,6 @@ fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navControlle
                 mostrarBaseDatos.value -> MostrarBaseDeDatos(viewModel, navController)
                 else -> {
                     SeccionAlimentosRecientes(viewModel, navController)
-                    SeccionConsumoDiario(viewModel, navController)
                 }
             }
         }
@@ -126,7 +132,7 @@ fun BuscarAlimentoScreenContent(viewModel: BuscarAlimentoViewModel, navControlle
 // Campo de texto para buscar alimentos
 @Composable
 fun BarraBusqueda(
-    viewModel: BuscarAlimentoViewModel,
+    viewModel: AlimentoViewModel,
     mostrarBaseDatos: MutableState<Boolean>,
     isSearchFocused: MutableState<Boolean>
 ) {
@@ -179,7 +185,7 @@ fun BarraBusqueda(
 
 @Composable
 fun BotonesSuperiores(
-    viewModel: BuscarAlimentoViewModel,
+    viewModel: AlimentoViewModel,
     navController: NavHostController,
     mostrarBaseDatos: MutableState<Boolean>
 ) {
@@ -229,7 +235,7 @@ fun BotonesSuperiores(
 }
 
 @Composable
-fun MostrarBaseDeDatos(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
+fun MostrarBaseDeDatos(viewModel: AlimentoViewModel, navController: NavHostController) {
     Text(
         text = "Base de Datos de Alimentos",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -254,7 +260,7 @@ fun MostrarBaseDeDatos(viewModel: BuscarAlimentoViewModel, navController: NavHos
 }
 
 @Composable
-fun SeccionAlimentosRecientes(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
+fun SeccionAlimentosRecientes(viewModel: AlimentoViewModel, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,302 +314,7 @@ fun SeccionAlimentosRecientes(viewModel: BuscarAlimentoViewModel, navController:
 }
 
 @Composable
-fun SeccionConsumoDiario(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
-    Text(
-        text = "Resumen de Consumo Diario",
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onBackground,
-        modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 12.dp)
-    )
-
-    val comidasAgrupadas = viewModel.comidasRecientes.groupBy { it.momentoDelDia }
-    val momentos = listOf("Desayuno", "Almuerzo", "Cena", "Snack")
-    var registroAEliminar by remember { mutableStateOf<RegistroAlimentoSalida?>(null) }
-
-    momentos.forEach { momento ->
-        ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = momento,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
-                            onClick = { viewModel.eliminarRegistrosPorMomentoYFecha(momento) },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Eliminar",
-                                tint = MaterialTheme.colorScheme.error,
-                                //modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                viewModel.mostrarDialogoRegistro.value = true
-                                viewModel.momentoSeleccionado = momento
-                            },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Agregar",
-                                tint = MaterialTheme.colorScheme.primary,
-                                //modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val registros = comidasAgrupadas[momento].orEmpty()
-
-                if (registros.isEmpty()) {
-                    Text(
-                        text = "No has registrado los alimentos para $momento.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    registros.forEach { registro ->
-                        AlimentoItem(
-                            alimento = registro.alimento,
-                            esFavorito = viewModel.esFavorito(registro.alimento.idAlimento),
-                            onClick = {
-                                navController.navigate("detalleAlimento/${registro.alimento.idAlimento}")
-                            },
-                            onToggleFavorito = {
-                                viewModel.toggleFavorito(registro.alimento)
-                            },
-                            onEliminarFavorito = {
-                                registroAEliminar = registro
-                            },
-                            mostrarFavorito = false
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    DialogoRegistroAlimento(viewModel)
-
-    // Diálogo de confirmación
-    registroAEliminar?.let {
-        AlertDialog(
-            onDismissRequest = { registroAEliminar = null },
-            title = { Text("Eliminar alimento") },
-            text = { Text("¿Estás seguro de que deseas eliminar este alimento del registro?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.eliminarRegistroIndividual(it.idRegistroAlimento)
-                    registroAEliminar = null
-                }) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { registroAEliminar = null }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-}
-
-// Diálogo de registro adaptado visualmente
-@Composable
-fun DialogoRegistroAlimento(viewModel: BuscarAlimentoViewModel) {
-    if (!viewModel.mostrarDialogoRegistro.value) return
-
-    val contexto = LocalContext.current
-    val listaAlimentos = viewModel.listaAlimentos
-    val unidadesDeMedida = listOf(
-        "mg", "g", "kg", "ml", "l", "tsp", "tbsp", "cup", "oz", "lb",
-        "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "lonja", "filete", "puñado"
-    )
-
-    var alimentoSeleccionado by remember { mutableStateOf<Alimento?>(null) }
-    var cantidadTexto by remember { mutableStateOf("") }
-    var unidadTexto by remember { mutableStateOf("") }
-
-    var alimentoExpanded by remember { mutableStateOf(false) }
-    var unidadExpanded by remember { mutableStateOf(false) }
-
-    var alimentoFieldPx by remember { mutableStateOf(0) }
-    var unidadFieldPx by remember { mutableStateOf(0) }
-    val density = LocalDensity.current
-
-    AlertDialog(
-        onDismissRequest = {
-            viewModel.mostrarDialogoRegistro.value = false
-            alimentoSeleccionado = null
-            cantidadTexto = ""
-            unidadTexto = ""
-        },
-        title = {
-            Text("Registrar Alimento", style = MaterialTheme.typography.titleMedium)
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = 8.dp)
-            ) {
-                // Selector de alimento
-                Box {
-                    OutlinedTextField(
-                        value = alimentoSeleccionado?.nombreAlimento ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Selecciona un alimento") },
-                        trailingIcon = {
-                            IconButton(onClick = { alimentoExpanded = !alimentoExpanded }) {
-                                Icon(
-                                    if (alimentoExpanded) Icons.Default.KeyboardArrowUp
-                                    else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = null
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onGloballyPositioned {
-                                alimentoFieldPx = it.size.width
-                            }
-                    )
-
-                    DropdownMenu(
-                        expanded = alimentoExpanded,
-                        onDismissRequest = { alimentoExpanded = false },
-                        modifier = Modifier
-                            .width(with(density) { alimentoFieldPx.toDp() })
-                            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-                    ) {
-                        listaAlimentos.forEach { alimento ->
-                            DropdownMenuItem(
-                                text = { Text(alimento.nombreAlimento) },
-                                onClick = {
-                                    alimentoSeleccionado = alimento
-                                    alimentoExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Cantidad
-                OutlinedTextField(
-                    value = cantidadTexto,
-                    onValueChange = { cantidadTexto = it },
-                    label = { Text("Cantidad") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Box {
-                    OutlinedTextField(
-                        value = unidadTexto,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Unidad de medida") },
-                        trailingIcon = {
-                            IconButton(onClick = { unidadExpanded = !unidadExpanded }) {
-                                Icon(
-                                    if (unidadExpanded) Icons.Default.KeyboardArrowUp
-                                    else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = null
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { unidadExpanded = true }
-                            .onGloballyPositioned {
-                                unidadFieldPx = it.size.width
-                            }
-                    )
-
-                    DropdownMenu(
-                        expanded = unidadExpanded,
-                        onDismissRequest = { unidadExpanded = false },
-                        modifier = Modifier
-                            .width(with(density) { unidadFieldPx.toDp() })
-                            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp))
-                    ) {
-                        unidadesDeMedida.forEach { unidad ->
-                            DropdownMenuItem(
-                                text = { Text(unidad) },
-                                onClick = {
-                                    unidadTexto = unidad
-                                    unidadExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                val cantidad = cantidadTexto.toFloatOrNull()
-                if (alimentoSeleccionado != null && unidadTexto.isNotBlank() && cantidad != null) {
-                    viewModel.registrarAlimentoDesdeDialogo(
-                        idAlimento = alimentoSeleccionado!!.idAlimento,
-                        cantidad = cantidad,
-                        unidad = unidadTexto,
-                        momento = viewModel.momentoSeleccionado
-                    )
-                    viewModel.mostrarDialogoRegistro.value = false
-                    alimentoSeleccionado = null
-                    cantidadTexto = ""
-                    unidadTexto = ""
-                    Toast.makeText(contexto, "Alimento registrado con éxito", Toast.LENGTH_SHORT).show()
-                    viewModel.cargarComidasRecientes()
-                } else {
-                    Toast.makeText(contexto, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
-                }
-            }) {
-                Text("Registrar", color = MaterialTheme.colorScheme.primary)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                viewModel.mostrarDialogoRegistro.value = false
-            }) {
-                Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        },
-        shape = RoundedCornerShape(16.dp),
-        containerColor = MaterialTheme.colorScheme.surface
-    )
-}
-
-@Composable
-fun MostrarError(viewModel: BuscarAlimentoViewModel) {
+fun MostrarErrorBuscar(viewModel: AlimentoViewModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -679,7 +390,7 @@ fun MostrarCargando() {
 }
 
 @Composable
-fun MostrarResultadosBusqueda(viewModel: BuscarAlimentoViewModel, navController: NavHostController) {
+fun MostrarResultadosBusqueda(viewModel: AlimentoViewModel, navController: NavHostController) {
     Text(
         text = "Resultados para \"${viewModel.busqueda}\"",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),

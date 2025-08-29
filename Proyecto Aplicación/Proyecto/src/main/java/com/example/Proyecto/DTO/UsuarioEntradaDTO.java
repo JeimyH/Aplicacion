@@ -22,4 +22,5 @@ public class UsuarioEntradaDTO {
     private String restriccionesDieta;
     private String objetivosSalud;
     private Float pesoObjetivo;
+    private String nivelActividad;
 }

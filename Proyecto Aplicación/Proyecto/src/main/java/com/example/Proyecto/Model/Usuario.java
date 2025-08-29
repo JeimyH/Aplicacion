@@ -56,16 +56,14 @@ public class Usuario {
     @Column(name = "Peso_Objetivo")
     private Float pesoObjetivo;
 
+    @Column(name = "nivel_actividad")
+    private String nivelActividad;
+
     @Column(name = "Creado_En", nullable = false)
     private Timestamp creadoEn;
 
     @Column(name = "Actualizado_En")
     private Timestamp actualizadoEn;
-
-    /*@PrePersist
-    protected void onCreate() {
-        this.creadoEn = new Timestamp(System.currentTimeMillis());
-    }*/
 
     // Relaciones entre tablas
     // Uno a muchos
@@ -84,7 +82,11 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<EstadisticasNutricionales> estadisticasNutricionales;
+    private List<EstadisticaDiaria> estadisticaDiarias;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<EstadisticaMensual> estadisticaMensuales;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore

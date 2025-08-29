@@ -42,9 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.frontendproyectoapp.model.TarjetaData
 import com.example.frontendproyectoapp.ui.theme.PastelMint
 import com.example.frontendproyectoapp.viewModel.UsuarioViewModel
 
@@ -64,11 +66,31 @@ fun RegistroVent5ScreenContent(
     onBackClick: () -> Unit = {}
 ) {
     val opcionesDieta = listOf(
-        "Recomendada" to "https://drive.google.com/uc?export=view&id=1SpBBOsMFRYO6Nv02Fh8_xcmK3gpch219",
-        "Alta en proteínas" to "https://drive.google.com/uc?export=view&id=1d4vTRyPtQjdmcPmwOMriI_MFUWgph7NV",
-        "Baja en carbohidratos" to "https://drive.google.com/uc?export=view&id=1nibgXzxPKAWiSf1LDbAmJxt2V46YediJ",
-        "Keto" to "https://drive.google.com/uc?export=view&id=1u7rbo49gyW41bm9X7LDkhbEKME-krj0t",
-        "Baja en grasas" to "https://drive.google.com/uc?export=view&id=1LsHLUQyz7mwmgV7CeZI-Px_MQlGNPZlU"
+        TarjetaData(
+            titulo = "Recomendada",
+            descripcion = "Dieta balanceada con proporciones adecuadas de carbohidratos, proteínas y grasas, ideal para mantener una buena salud general.",
+            imagenUrl = "https://drive.google.com/uc?export=view&id=1SpBBOsMFRYO6Nv02Fh8_xcmK3gpch219"
+        ),
+        TarjetaData(
+            titulo = "Alta en proteínas",
+            descripcion = "Favorece el consumo de proteínas para ganar músculo, mejorar la saciedad y apoyar la recuperación física.",
+            imagenUrl = "https://drive.google.com/uc?export=view&id=1d4vTRyPtQjdmcPmwOMriI_MFUWgph7NV"
+        ),
+        TarjetaData(
+            titulo = "Baja en carbohidratos",
+            descripcion = "Reduce alimentos ricos en carbohidratos para controlar peso o niveles de glucosa, priorizando proteínas y grasas.",
+            imagenUrl = "https://drive.google.com/uc?export=view&id=1nibgXzxPKAWiSf1LDbAmJxt2V46YediJ"
+        ),
+        TarjetaData(
+            titulo = "Keto",
+            descripcion = "Muy baja en carbohidratos y alta en grasas, induce cetosis para usar grasa como principal fuente de energía.",
+            imagenUrl = "https://drive.google.com/uc?export=view&id=1u7rbo49gyW41bm9X7LDkhbEKME-krj0t"
+        ),
+        TarjetaData(
+            titulo = "Baja en grasas",
+            descripcion = "Limita grasas, especialmente saturadas, para apoyar la salud cardiovascular y digestiva.",
+            imagenUrl = "https://drive.google.com/uc?export=view&id=1LsHLUQyz7mwmgV7CeZI-Px_MQlGNPZlU"
+        )
     )
 
     var seleccionDieta by remember { mutableStateOf(viewModel.restriccionesDieta.ifEmpty { "" }) }
@@ -82,12 +104,16 @@ fun RegistroVent5ScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         // Barra de progreso paso 4/6
         LinearProgressIndicator(
-            progress = 4 / 6f,
+            progress = 4 / 7f,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp),
+                .height(6.dp)
+                .clip(RoundedCornerShape(4.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -113,22 +139,24 @@ fun RegistroVent5ScreenContent(
             ) {
                 Text(
                     text = "¿Qué tipo de dieta prefieres?",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
-                opcionesDieta.forEach { (tipoDieta, imagenUrl) ->
-                    val isSelected = tipoDieta == seleccionDieta
+                opcionesDieta.forEach { (titulo, descripcion, imagenUrl) ->
+                    val isSelected = titulo == seleccionDieta
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp)
                             .clickable {
-                                seleccionDieta = tipoDieta
-                                viewModel.restriccionesDieta = tipoDieta
+                                seleccionDieta = titulo
+                                viewModel.restriccionesDieta = titulo
                             },
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 2.dp),
@@ -143,22 +171,32 @@ fun RegistroVent5ScreenContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                AsyncImage(
-                                    model = imagenUrl,
-                                    contentDescription = tipoDieta,
-                                    modifier = Modifier
-                                        .size(90.dp)
-                                        .clip(RoundedCornerShape(20.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
+                            AsyncImage(
+                                model = imagenUrl,
+                                contentDescription = titulo,
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(RoundedCornerShape(20.dp)),
+                                contentScale = ContentScale.Crop
+                            )
 
-                                Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = titulo,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 Text(
-                                    text = tipoDieta,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    text = descripcion,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
 
@@ -194,11 +232,11 @@ fun RegistroVent5ScreenContent(
                 disabledContentColor = Color.White.copy(alpha = 0.6f)
             )
         ) {
-            Text("Continuar", style = MaterialTheme.typography.labelLarge)
+            Text("Continuar", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
-
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

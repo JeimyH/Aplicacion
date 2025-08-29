@@ -1,18 +1,22 @@
 package com.example.frontendproyectoapp.repository
 
-import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
+import com.example.frontendproyectoapp.interfaces.AlimentoService
+import com.example.frontendproyectoapp.interfaces.RetrofitClient
 import com.example.frontendproyectoapp.model.Alimento
 
 class FavoritosRepository {
+
+    private val alimentoService = RetrofitClient.createService(AlimentoService::class.java)
+
     suspend fun obtenerFavoritos(idUsuario: Long): List<Alimento> {
-        return RetrofitClientAlimento.alimentoService.obtenerFavoritos(idUsuario)
+        return alimentoService.obtenerFavoritos(idUsuario)
     }
 
     suspend fun marcarFavorito(idUsuario: Long, idAlimento: Long) {
-        RetrofitClientAlimento.alimentoService.marcarFavorito(idUsuario, idAlimento)
+        alimentoService.marcarFavorito(idUsuario, idAlimento)
     }
 
     suspend fun eliminarFavorito(idUsuario: Long, idAlimento: Long) {
-        RetrofitClientAlimento.alimentoService.eliminarFavorito(idUsuario, idAlimento)
+        alimentoService.eliminarFavorito(idUsuario, idAlimento)
     }
 }

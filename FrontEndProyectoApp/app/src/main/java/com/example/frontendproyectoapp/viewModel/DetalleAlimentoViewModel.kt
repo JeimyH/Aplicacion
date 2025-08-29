@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
-import com.example.frontendproyectoapp.model.UserPreferences
-import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
+import com.example.frontendproyectoapp.DataStores.UserPreferences
+import com.example.frontendproyectoapp.repository.AlimentoRepository
 import kotlinx.coroutines.launch
 
 class DetalleAlimentoViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
-    private val repository = BuscarAlimentoRepository()
+    private val repository = AlimentoRepository()
 
     val estadoRegistro = mutableStateOf(false)
     val error = mutableStateOf<String?>(null)
@@ -29,8 +29,10 @@ class DetalleAlimentoViewModel(application: Application) : AndroidViewModel(appl
                     val registro = RegistroAlimentoEntrada(
                         idUsuario = idUsuario,
                         idAlimento = idAlimento,
-                        tamanoPorcion = cantidad,
-                        unidadMedida = unidad,
+                        tamanoPorcion = 0f,
+                        unidadMedida = "",
+                        tamanoOriginal = cantidad,
+                        unidadOriginal = unidad,
                         momentoDelDia = momento
                     )
                     repository.guardarRegistro(registro)

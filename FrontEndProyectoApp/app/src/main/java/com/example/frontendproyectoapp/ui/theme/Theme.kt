@@ -1,6 +1,5 @@
 package com.example.frontendproyectoapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -13,18 +12,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
-    primary = PastelMint,
-    secondary = PastelLeaf,
-    tertiary = PastelYellow,
-    background = PastelBackground,
-    surface = PastelWhite,
+    primary = PastelMint,           // Botones principales
+    secondary = PastelLeaf,         // Switches, chips secundarios
+    tertiary = PastelYellow,        // Íconos, badges
+    background = PastelBackground,  // Fondo general
+    surface = PastelWhite,          // Tarjetas, diálogos
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.Black,
     onBackground = TextOlive,
     onSurface = TextOlive,
     error = PastelError,
-    onError = Color.White
+    onError = Color.White,
+    surfaceVariant = Pastel
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -42,11 +42,12 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color.Black
 )
 
+
 @Composable
 fun FrontEndProyectoAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

@@ -64,6 +64,4 @@ public class AlimentoRecienteController {
                     .body("Error al eliminar el alimento reciente");
         }
     }
-
-
 }

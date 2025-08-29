@@ -29,5 +29,10 @@ public interface RegistroAguaRepository extends JpaRepository<RegistroAgua, Long
     @Query("SELECT DISTINCT r.fecha FROM RegistroAgua r WHERE r.usuario.id = :idUsuario")
     List<LocalDate> findFechasAguaPorUsuario(@Param("idUsuario") Long idUsuario);
 
+    @Query("SELECT COALESCE(SUM(r.cantidadml), 0) " +
+            "FROM RegistroAgua r " +
+            "WHERE r.usuario.id = :idUsuario AND r.fecha = :fecha")
+    int obtenerTotalAguaPorFecha(@Param("idUsuario") Long idUsuario,
+                                 @Param("fecha") LocalDate fecha);
 
 }

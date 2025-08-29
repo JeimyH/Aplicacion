@@ -3,20 +3,21 @@ package com.example.frontendproyectoapp.ui.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Colores personalizados para DietaSmart
-val PastelMint = Color(0xFFA8D5BA)       // Primario: Verde menta suave
-val PastelLeaf = Color(0xFFC7E9C0)       // Verde hoja pálido
-val PastelYellow = Color(0xFFF1F8A0)     // Acento amarillo pastel
-val PastelBackground = Color(0xFFF2FBF2) // Fondo claro verdoso
-val PastelWhite = Color(0xFFFFFFFF)      // Blanco neutro
-val TextOlive = Color(0xFF5E716A)        // Texto principal verde oliva
-val TextGray = Color(0xFF8A8A8A)         // Texto gris medio
-val PastelError = Color(0xFFF8B5B1)      // Color de error o advertencia (rosado pastel)
+// Colores base
+val PastelMint = Color(0xFF91CF90)       // Verde menta más natural // Botones principales
+val PastelLeaf = Color(0xFFB4D9A6)       // Verde hoja
+val PastelYellow = Color(0xFFFFEDA1)     // Amarillo banana suave
+val PastelBackground = Color(0xFFF8FFF0) // Fondo claro con tinte amarillo verdoso
+val PastelWhite = Color(0xFFFFFCF2)      // Blanco cálido tipo crema
+val TextOlive = Color(0xFF5E716A)        // Verde oliva para texto
+val TextGray = Color(0xFF8A8A8A)         // Gris medio neutro
+val PastelError = Color(0xFFCE90CF)      // Rosado pastel (sin cambios)
+val Pastel = Color(0xFFF2F5FF)           // trackColor-LinearProgress
 
-// Colores para puntos de actividad en el calendario
-val DotAgua = Color(0xFF9ED0F5)    // Azul pastel agua
-val DotComida = Color(0xFFB4E3B0)  // Verde pastel comida
-val DotAmbos = Color(0xFFD0B4E3)   // Morado pastel ambos
+// Colores de puntos para actividades del calendario
+val DotAgua = Color(0xFF9CCFF5)     // Azul pastel agua (ligeramente más brillante)
+val DotComida = Color(0xFFA9D69A)   // Verde pastel más cercano a las manzanas/aguacate
+val DotAmbos = Color(0xFFD6B5E3)    // Morado pastel más claro
 
 // Extensiones para usar en MaterialTheme.colorScheme
 val ColorScheme.dotAgua: Color

@@ -9,6 +9,7 @@ import com.example.Proyecto.Repository.AlimentoRepository;
 import com.example.Proyecto.Repository.RegistroAlimentoRepository;
 import com.example.Proyecto.Repository.UnidadEquivalenciaRepository;
 import com.example.Proyecto.Repository.UsuarioRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +20,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.slf4j.Logger;
+
 
 @Service
 public class RegistroAlimentoService {
+
+    private static final Logger log = LoggerFactory.getLogger(RegistroAlimentoService.class);
+
     @Autowired
     public RegistroAlimentoRepository registroAlimentoRepository;
 
@@ -33,6 +39,9 @@ public class RegistroAlimentoService {
 
     @Autowired
     public UnidadEquivalenciaRepository unidadEquivalenciaRepository;
+
+    @Autowired
+    public EstadisticasNutricionalesService estadisticasService;
 
     public List<RegistroAlimento> listarRegistroAlimento(){
         // Validacion para intentar obtener la lista de Registros de Alimento
@@ -70,44 +79,63 @@ public class RegistroAlimentoService {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
                 .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
 
-        String unidadOrigen = dto.getUnidadMedida().toLowerCase();
+        String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
         String unidadDestino = "gramos";
-        float cantidadUsuario = dto.getTamanoPorcion();
+        float cantidadOriginal = dto.getTamanoOriginal();
+
+        // Validación explícita de unidad original (evita valores inválidos)
+        List<String> unidadesValidas = List.of(
+                "mg", "g", "kg", "ml", "l", "tsp", "tbsp", "cup", "oz", "lb",
+                "unidad", "porción", "rebanada", "pieza", "taza", "vaso",
+                "lonja", "filete", "puñado", "cucharada"
+        );
+
+        if (!unidadesValidas.contains(unidadOrigen)) {
+            throw new IllegalArgumentException("Unidad original inválida: " + unidadOrigen);
+        }
+
         float cantidadEnGramos;
 
-        // Buscar equivalencia existente
         Optional<UnidadEquivalencia> equivalenciaOpt = unidadEquivalenciaRepository
                 .findByAlimentoAndUnidadOrigenAndUnidadDestino(alimento, unidadOrigen, unidadDestino);
 
         if (equivalenciaOpt.isPresent()) {
             float factor = equivalenciaOpt.get().getFactorConversion();
-            cantidadEnGramos = cantidadUsuario * factor;
+            cantidadEnGramos = cantidadOriginal * factor;
         } else {
-            // Crear una equivalencia nueva temporal (por defecto 1.0) - deberías actualizarla después
             float factorEstimado = 1.0f;
-
             UnidadEquivalencia nuevaEquivalencia = new UnidadEquivalencia();
             nuevaEquivalencia.setAlimento(alimento);
             nuevaEquivalencia.setUnidadOrigen(unidadOrigen);
             nuevaEquivalencia.setUnidadDestino(unidadDestino);
             nuevaEquivalencia.setFactorConversion(factorEstimado);
-
             unidadEquivalenciaRepository.save(nuevaEquivalencia);
-            cantidadEnGramos = cantidadUsuario * factorEstimado;
+
+            cantidadEnGramos = cantidadOriginal * factorEstimado;
         }
 
-        // Crear y guardar el registro en gramos
         RegistroAlimento registro = new RegistroAlimento();
         registro.setUsuario(usuario);
         registro.setAlimento(alimento);
-        registro.setTamanoPorcion(cantidadEnGramos); // en gramos
-        registro.setUnidadMedida("gramos");
+        registro.setTamanoPorcion(cantidadEnGramos);      // convertido
+        registro.setUnidadMedida(unidadDestino);          // convertido (gramos)
+        registro.setTamanoOriginal(cantidadOriginal);     // original
+        registro.setUnidadOriginal(unidadOrigen);         // original
         registro.setMomentoDelDia(dto.getMomentoDelDia());
         registro.setConsumidoEn(LocalDateTime.now());
 
-        return registroAlimentoRepository.save(registro);
-    }
+        RegistroAlimento registroGuardado = registroAlimentoRepository.save(registro);
+        // Actualizar estadísticas diarias justo después de guardar el registro
+        LocalDate fechaRegistro = registroGuardado.getConsumidoEn().toLocalDate();
+        estadisticasService.guardarEstadisticaDiaria(usuario.getIdUsuario(), fechaRegistro);
 
+        // Actualizar estadísticas mensuales
+        int anio = fechaRegistro.getYear();
+        int mes = fechaRegistro.getMonthValue();
+        estadisticasService.guardarEstadisticaMensual(usuario.getIdUsuario(), anio, mes);
+
+        return registroGuardado;
+    }
 
     public List<RegistroAlimento> obtenerRecientesPorUsuario(Long idUsuario) {
         return registroAlimentoRepository.findRecientesConAlimento(idUsuario);
@@ -157,6 +185,20 @@ public class RegistroAlimentoService {
             throw new RuntimeException("Registro no encontrado");
         }
         registroAlimentoRepository.deleteById(idRegistro);
+    }
+
+    // Obtener todas las unidades de origen de un alimento por su ID.
+    public List<String> obtenerUnidadesPorIdAlimento(Long idAlimento) {
+        List<String> unidades = unidadEquivalenciaRepository.findUnidadOrigenByAlimentoId(idAlimento);
+        log.info("Obteniendo unidades de origen para Alimento ID {}: {}", idAlimento, unidades);
+        return unidades;
+    }
+
+    // Obtener todas las unidades de origen de un alimento por su nombre.
+    public List<String> obtenerUnidadesPorNombreAlimento(String nombreAlimento) {
+        List<String> unidades = unidadEquivalenciaRepository.findUnidadOrigenByAlimentoNombre(nombreAlimento);
+        log.info("Obteniendo unidades de origen para Alimento '{}': {}", nombreAlimento, unidades);
+        return unidades;
     }
 
 

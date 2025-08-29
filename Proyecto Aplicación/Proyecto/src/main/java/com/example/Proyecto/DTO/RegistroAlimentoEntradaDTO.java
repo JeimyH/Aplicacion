@@ -9,8 +9,10 @@ import lombok.*;
 public class RegistroAlimentoEntradaDTO {
     private Long idUsuario;
     private Long idAlimento;
-    private Float tamanoPorcion;
-    private String unidadMedida;
+    private Float tamanoPorcion;   // Cantidad convertida (en gramos)
+    private String unidadMedida;   // Unidad convertida (gramos)
+    private Float tamanoOriginal;  // Cantidad original (ej. 1 vaso)
+    private String unidadOriginal; // Unidad original (ej. vaso)
     private String momentoDelDia;
 }
 

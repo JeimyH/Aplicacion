@@ -24,6 +24,7 @@ public class UsuarioRespuestaDTO {
     private String restriccionesDieta;
     private String objetivosSalud;
     private Float pesoObjetivo;
+    private String nivelActividad;
 
     public UsuarioRespuestaDTO(Usuario usuario) {
         this.idUsuario = usuario.getIdUsuario();
@@ -36,5 +37,6 @@ public class UsuarioRespuestaDTO {
         this.restriccionesDieta = usuario.getRestriccionesDieta();
         this.objetivosSalud = usuario.getObjetivosSalud();
         this.pesoObjetivo = usuario.getPesoObjetivo();
+        this.nivelActividad = usuario.getNivelActividad();
     }
 }

@@ -10,6 +10,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class ResumenDiarioDTO {
-
     private Float totalCalorias, totalProteinas, totalCarbohidratos, totalGrasas, totalAzucares, totalFibra, totalSodio, totalGrasasSaturadas;
 }

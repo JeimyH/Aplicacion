@@ -8,21 +8,20 @@ import androidx.lifecycle.viewModelScope
 import com.example.frontendproyectoapp.model.Alimento
 import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
-import com.example.frontendproyectoapp.model.UserPreferences
-import com.example.frontendproyectoapp.repository.BuscarAlimentoRepository
+import com.example.frontendproyectoapp.DataStores.UserPreferences
+import com.example.frontendproyectoapp.repository.AlimentoRepository
 import com.example.frontendproyectoapp.repository.FavoritosRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 
-class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(application) {
+class AlimentoViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
-    private val repository = BuscarAlimentoRepository()
+    private val repository = AlimentoRepository()
     private val favoritosRepository = FavoritosRepository()
 
     var errorCarga by mutableStateOf<String?>(null)
@@ -35,6 +34,12 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
     var busqueda by mutableStateOf("")
     var idUsuario: Long? = null
     var alimentosAgrupados by mutableStateOf<Map<String, List<Alimento>>>(emptyMap())
+
+    private val _unidades = mutableStateOf<List<String>>(emptyList())
+    val unidades: State<List<String>> = _unidades
+
+    private val _error = mutableStateOf<String?>(null)
+    val error: State<String?> = _error
 
     var mostrarDialogoRegistro = mutableStateOf(false)
     var momentoSeleccionado by mutableStateOf("")
@@ -164,16 +169,23 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
 
                     val zonaLocal = ZoneId.systemDefault()
                     val hoyLocal = LocalDate.now(zonaLocal)
+                    val inicioHoyLocal = hoyLocal.atStartOfDay(zonaLocal)
+                    val finHoyLocal = inicioHoyLocal.plusDays(1).minusNanos(1)
                     Log.d("BuscarVM", "Fecha local actual: $hoyLocal")
+                    Log.d("BuscarVM", "Inicio día local: $inicioHoyLocal")
+                    Log.d("BuscarVM", "Fin día local: $finHoyLocal")
+
+                    val formatterBD = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
 
                     comidasRecientes = todosLosRegistros.filter { registro ->
                         try {
-                            val fechaUtc = LocalDateTime.parse(registro.consumidoEn, flexibleIsoFormatter)
-                            val fechaLocal = fechaUtc.atZone(ZoneOffset.UTC).withZoneSameInstant(zonaLocal).toLocalDate()
-                            Log.d("BuscarVM", "Registro: ${registro.alimento?.nombreAlimento} | Local: $fechaLocal")
-                            fechaLocal == hoyLocal
+                            //val fechaLocalDateTime = LocalDateTime.parse(registro.consumidoEn, formatterBD)
+                            val fechaLocalDateTime = LocalDateTime.parse(registro.consumidoEn, flexibleIsoFormatter)
+                            val fechaLocalZoned = fechaLocalDateTime.atZone(zonaLocal) // <-- Aquí el cambio
+                            Log.d("BuscarVM", "Registro: ${registro.alimento?.nombreAlimento} | Local Zoned: $fechaLocalZoned")
+                            fechaLocalZoned >= inicioHoyLocal && fechaLocalZoned <= finHoyLocal
                         } catch (e: Exception) {
-                            Log.e("BuscarVM", "Error parseando fecha: ${registro.consumidoEn}")
+                            Log.e("BuscarVM", "Error parseando fecha: ${registro.consumidoEn} - ${e.message}")
                             false
                         }
                     }
@@ -260,16 +272,19 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
                     val dto = RegistroAlimentoEntrada(
                         idUsuario = uid,
                         idAlimento = idAlimento,
-                        tamanoPorcion = cantidad,
-                        unidadMedida = unidad,
+                        tamanoPorcion = 0f,
+                        unidadMedida = "",
+                        tamanoOriginal = cantidad,
+                        unidadOriginal = unidad,
                         momentoDelDia = momento
                     )
+                    Log.d("AlimentoVM", "Preparando DTO para enviar: $dto")
                     repository.guardarRegistro(dto)
-                    Log.d("BuscarVM", "Registro exitoso: alimento=$idAlimento, cantidad=$cantidad $unidad, momento=$momento")
+                    Log.d("AlimentoVM", "✔ Registro enviado exitosamente")
                     cargarComidasRecientes()
                 }
             } catch (e: Exception) {
-                Log.e("BuscarVM", "Error registrando alimento desde diálogo: ${e.message}")
+                Log.e("AlimentoVM", "✖ Error registrando alimento desde diálogo: ${e.message}")
             }
         }
     }
@@ -316,5 +331,26 @@ class BuscarAlimentoViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    fun cargarUnidadesPorId(idAlimento: Long) {
+        viewModelScope.launch {
+            try {
+                _unidades.value = repository.obtenerUnidadesPorId(idAlimento)
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
+    fun cargarUnidadesPorNombre(nombreAlimento: String) {
+        viewModelScope.launch {
+            try {
+                _unidades.value = repository.obtenerUnidadesPorNombre(nombreAlimento)
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
 }
 

@@ -14,8 +14,6 @@ import java.util.List;
 @Repository
 public interface RegistroAlimentoRepository extends JpaRepository<RegistroAlimento, Long> {
 
-    List<RegistroAlimento> findByUsuario_IdUsuarioOrderByConsumidoEnDesc(Long idUsuario);
-
     @Query("SELECT r FROM RegistroAlimento r JOIN FETCH r.alimento WHERE r.usuario.idUsuario = :idUsuario ORDER BY r.consumidoEn DESC")
     List<RegistroAlimento> findRecientesConAlimento(@Param("idUsuario") Long idUsuario);
 
@@ -43,4 +41,19 @@ public interface RegistroAlimentoRepository extends JpaRepository<RegistroAlimen
     @Query("SELECT r FROM RegistroAlimento r WHERE r.usuario.id = :idUsuario AND r.consumidoEn BETWEEN :inicio AND :fin")
     List<RegistroAlimento> findByUsuarioAndFecha(Long idUsuario, LocalDateTime inicio, LocalDateTime fin);
 
+
+    @Query("SELECT r FROM RegistroAlimento r WHERE r.usuario.idUsuario = :idUsuario AND r.consumidoEn BETWEEN :inicio AND :fin AND r.momentoDelDia = :momento")
+    List<RegistroAlimento> findByUsuarioAndFechaAndMomento(
+            @Param("idUsuario") Long idUsuario,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin,
+            @Param("momento") String momento
+    );
+
+    @Query("SELECT COUNT(r) FROM RegistroAlimento r WHERE r.usuario.idUsuario = :idUsuario AND r.consumidoEn BETWEEN :inicio AND :fin")
+    int countByUsuarioAndFecha(
+            @Param("idUsuario") Long idUsuario,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin
+    );
 }

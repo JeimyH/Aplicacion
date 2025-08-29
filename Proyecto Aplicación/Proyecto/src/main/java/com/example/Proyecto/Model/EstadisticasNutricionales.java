@@ -59,9 +59,6 @@ public class EstadisticasNutricionales {
     @Column(name = "IMC", nullable = false)
     private Float imc;
 
-    //@Column(name = "Objetivos_Cumplidos")
-    //private String objetivosCumplidos;
-
     @Column(name = "Calorias_Desayuno")
     private Float caloriasDesayuno;
 

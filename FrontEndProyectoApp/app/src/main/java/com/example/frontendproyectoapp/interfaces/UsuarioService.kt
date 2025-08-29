@@ -3,14 +3,13 @@ package com.example.frontendproyectoapp.interfaces
 import com.example.frontendproyectoapp.model.Login
 import com.example.frontendproyectoapp.model.UsuarioEntrada
 import com.example.frontendproyectoapp.model.UsuarioRespuesta
-import okhttp3.Credentials
-import okhttp3.OkHttpClient
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UsuarioService {
@@ -27,31 +26,53 @@ interface UsuarioService {
     @GET("/api/Usuario/existeNombre")
     suspend fun verificarNombreExistente(@Query("nombre") nombre: String): Boolean
 
-}
+    @GET("api/Usuario/{idUsuario}")
+    suspend fun obtenerUsuarioPorId(
+        @Path("idUsuario") idUsuario: Long
+    ): Response<UsuarioRespuesta>
 
-object RetrofitClientUsuario {
-    // private const val BASE_URL = "http://10.0.2.2:8080"
-    private const val BASE_URL = "http://192.168.1.8:8080"
-    private const val USUARIO = "admin"  // Cambia aquí por tu usuario
-    private const val PASSWORD = "admin123" // Cambia aquí por tu contraseña
+    @DELETE("/api/Usuario/eliminar/{idUsuario}")
+    suspend fun eliminarUsuario(@Path("idUsuario") idUsuario: Long): Response<Unit>
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            val original = chain.request()
-            val requestBuilder = original.newBuilder()
-                .header("Authorization", Credentials.basic(USUARIO, PASSWORD))
-                .method(original.method, original.body)
-            val request = requestBuilder.build()
-            chain.proceed(request)
-        }
-        .build()
+    @PUT("/api/Usuario/actualizarAltura/{idUsuario}")
+    suspend fun actualizarAltura(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("alturaActualizada") alturaActualizada: Float
+    ): Response<UsuarioRespuesta>
 
-    val usuarioService: UsuarioService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)  // Importante: asigna el cliente con el interceptor
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(UsuarioService::class.java)
-    }
+    @PUT("/api/Usuario/actualizarPeso/{idUsuario}")
+    suspend fun actualizarPeso(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("pesoActualizado") pesoActualizado: Float
+    ): Response<UsuarioRespuesta>
+
+    @PUT("/api/Usuario/actualizarPesoObjetivo/{idUsuario}")
+    suspend fun actualizarPesoObjetivo(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("pesoObjetivoActualizado") pesoObjetivoActualizado: Float
+    ): Response<UsuarioRespuesta>
+
+    @PUT("/api/Usuario/actualizarCorreo/{idUsuario}")
+    suspend fun actualizarCorreo(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("correoActualizado") correoActualizado: String
+    ): Response<UsuarioRespuesta>
+
+    @PUT("/api/Usuario/actualizarDieta/{idUsuario}")
+    suspend fun actualizarDieta(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("dietaActualizada") dietaActualizada: String
+    ): Response<UsuarioRespuesta>
+
+    @PUT("/api/Usuario/actualizarObjetivo/{idUsuario}")
+    suspend fun actualizarObjetivo(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("objetivoActualizado") objetivoActualizado: String
+    ): Response<UsuarioRespuesta>
+
+    @PUT("/api/Usuario/actualizarNivelAct/{idUsuario}")
+    suspend fun actualizarNivelAct(
+        @Path("idUsuario") idUsuario: Long,
+        @Query("nivelActividadActualizado") nivelActividadActualizado: String
+    ): Response<UsuarioRespuesta>
 }

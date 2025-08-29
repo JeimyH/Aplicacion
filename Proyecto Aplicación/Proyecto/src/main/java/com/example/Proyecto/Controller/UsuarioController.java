@@ -27,10 +27,38 @@ public class UsuarioController {
         respuesta.setFechaNacimiento(usuario.getFechaNacimiento());
         respuesta.setAltura(usuario.getAltura());
         respuesta.setPeso(usuario.getPeso());
+        respuesta.setPesoObjetivo(usuario.getPesoObjetivo());
         respuesta.setSexo(usuario.getSexo());
         respuesta.setObjetivosSalud(usuario.getObjetivosSalud());
         respuesta.setRestriccionesDieta(usuario.getRestriccionesDieta());
+        respuesta.setNivelActividad(usuario.getNivelActividad());
         return respuesta;
+    }
+
+    @GetMapping("/buscar/{idUsuario}")
+    public ResponseEntity<Usuario> listarPorIdUsuario(@PathVariable long idUsuario){
+        try {
+            Optional<Usuario> usuarioOpt = usuarioService.listarPorIdUsuario(idUsuario);
+            return usuarioOpt.map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @GetMapping("/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> usuarioPorId(@PathVariable Long idUsuario) {
+        try {
+            Usuario usuario = usuarioService.usuarioRepository.findById(idUsuario)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            UsuarioRespuestaDTO respuesta = mapToResponse(usuario);
+            return new ResponseEntity<>(respuesta, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/existeCorreo")
@@ -82,4 +110,125 @@ public class UsuarioController {
         }
     }
 
+    @DeleteMapping("/eliminar/{idUsuario}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable long idUsuario){
+        try {
+            usuarioService.eliminarUsuario(idUsuario);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @PutMapping("/actualizar/{idUsuario}")
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable long idUsuario, @RequestBody Usuario usuarioActualizado){
+        try {
+            Usuario usuario = usuarioService.actualizarUsuario(idUsuario, usuarioActualizado);
+            return new ResponseEntity<>(usuario, HttpStatus.OK); // 200 OK
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @PutMapping("/actualizarAltura/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarAltura(@PathVariable long idUsuario, @RequestParam Float alturaActualizada){
+        try {
+            Usuario usuario = usuarioService.actualizarAltura(idUsuario, alturaActualizada);
+
+            UsuarioRespuestaDTO usuarioDTO = new UsuarioRespuestaDTO(usuario);
+            return new ResponseEntity<>(usuarioDTO, HttpStatus.OK); // 200 OK
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @PutMapping("/actualizarPeso/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarPeso(@PathVariable long idUsuario, @RequestParam Float pesoActualizado){
+        try {
+            Usuario usuario = usuarioService.actualizarPeso(idUsuario, pesoActualizado);
+
+            UsuarioRespuestaDTO usuarioDTO = new UsuarioRespuestaDTO(usuario);
+            return new ResponseEntity<>(usuarioDTO, HttpStatus.OK); // 200 OK
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @PutMapping("/actualizarPesoObjetivo/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarPesoObjetivo(@PathVariable long idUsuario, @RequestParam Float pesoObjetivoActualizado){
+        try {
+            Usuario usuario = usuarioService.actualizarPesoObjetivo(idUsuario, pesoObjetivoActualizado);
+
+            UsuarioRespuestaDTO usuarioDTO = new UsuarioRespuestaDTO(usuario);
+            return new ResponseEntity<>(usuarioDTO, HttpStatus.OK); // 200 OK
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
+        }
+    }
+
+    @PutMapping("/actualizarDieta/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarDieta(
+            @PathVariable long idUsuario,
+            @RequestParam String dietaActualizada){
+        try {
+            Usuario usuario = usuarioService.actualizarDieta(idUsuario, dietaActualizada);
+            return ResponseEntity.ok(new UsuarioRespuestaDTO(usuario));
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/actualizarObjetivo/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarObjetivo(
+            @PathVariable long idUsuario,
+            @RequestParam String objetivoActualizado){
+        try {
+            Usuario usuario = usuarioService.actualizarObjetivo(idUsuario, objetivoActualizado);
+            return ResponseEntity.ok(new UsuarioRespuestaDTO(usuario));
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/actualizarNivelAct/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarNivelActividad(
+            @PathVariable long idUsuario,
+            @RequestParam String nivelActividadActualizado){
+        try {
+            Usuario usuario = usuarioService.actualizarNivelActividad(idUsuario, nivelActividadActualizado);
+            return ResponseEntity.ok(new UsuarioRespuestaDTO(usuario));
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/actualizarCorreo/{idUsuario}")
+    public ResponseEntity<UsuarioRespuestaDTO> actualizarCorreo(
+            @PathVariable long idUsuario,
+            @RequestParam String correoActualizado) {
+        try {
+            Usuario usuario = usuarioService.actualizarCorreo(idUsuario, correoActualizado);
+            return ResponseEntity.ok(new UsuarioRespuestaDTO(usuario));
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

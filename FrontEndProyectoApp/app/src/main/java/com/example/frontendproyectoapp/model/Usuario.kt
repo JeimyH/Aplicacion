@@ -10,6 +10,7 @@ data class Usuario (
     val peso: Float = 0f,
     val restriccionesDieta: String = "",
     val objetivosSalud: String = "",
+    val nivelActividad: String = "",
     val creadoEn: String? = null,
     val actualizadoEn: String? = null,
     val pesoObjetivo: Float = 0f

@@ -1,23 +1,22 @@
 package com.example.frontendproyectoapp.repository
 
 import android.util.Log
-import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
-import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimentoReciente
-import com.example.frontendproyectoapp.interfaces.RetrofitClientRegistroAlimento
+import com.example.frontendproyectoapp.interfaces.AlimentoRecienteService
+import com.example.frontendproyectoapp.interfaces.AlimentoService
+import com.example.frontendproyectoapp.interfaces.RegistroAlimentoService
+import com.example.frontendproyectoapp.interfaces.RetrofitClient
 import com.example.frontendproyectoapp.model.Alimento
 import com.example.frontendproyectoapp.model.AlimentoReciente
 import com.example.frontendproyectoapp.model.RegistroAlimentoEntrada
 import com.example.frontendproyectoapp.model.RegistroAlimentoSalida
 import retrofit2.Response
 
-class BuscarAlimentoRepository {
-    private val alimentoService = RetrofitClientAlimento.alimentoService
-    private val recienteService = RetrofitClientAlimentoReciente.alimentoRecienteService
+class AlimentoRepository {
+    private val alimentoService = RetrofitClient.createService(AlimentoService::class.java)
+    private val recienteService = RetrofitClient.createService(AlimentoRecienteService::class.java)
+    private val regAlimentoService = RetrofitClient.createService(RegistroAlimentoService::class.java)
 
     suspend fun obtenerTodos(): List<Alimento> = alimentoService.listarAlimentos()
-
-    suspend fun buscarPorNombre(nombre: String): Alimento? =
-        try { alimentoService.obtenerAlimentoPorNombre(nombre) } catch (e: Exception) { null }
 
     suspend fun obtenerFavoritos(idUsuario: Long): List<Alimento> =
         alimentoService.obtenerFavoritos(idUsuario)
@@ -46,23 +45,42 @@ class BuscarAlimentoRepository {
     }
 
     suspend fun guardarRegistro(registro: RegistroAlimentoEntrada) {
-        RetrofitClientRegistroAlimento.registroAlimentoService.guardarRegistro(registro)
+        Log.d("AlimentoRepo", "→ Enviando registro al backend: $registro")
+        val response = regAlimentoService.guardarRegistro(registro)
+        Log.d("AlimentoRepo", "← Respuesta backend guardarRegistro: ${response.code()} - ${response.message()}")
     }
 
+
     suspend fun obtenerComidasRecientes(idUsuario: Long): List<RegistroAlimentoSalida> {
-        return RetrofitClientRegistroAlimento.registroAlimentoService.obtenerComidasRecientes(idUsuario)
+        return regAlimentoService.obtenerComidasRecientes(idUsuario)
     }
 
     suspend fun eliminarRegistrosPorFechaYMomento(idUsuario: Long, fecha: String, momento: String): Response<Unit> {
         Log.d("RegistroRepo", "→ Enviando request DELETE con: idUsuario=$idUsuario, fecha=$fecha, momento=$momento")
-        return RetrofitClientRegistroAlimento.registroAlimentoService
+        return regAlimentoService
             .eliminarPorFechaYMomento(idUsuario, momento, fecha) // orden correcto de los @Path
     }
 
-
     suspend fun eliminarRegistroPorId(idRegistro: Long) {
-        val response = RetrofitClientRegistroAlimento.registroAlimentoService.eliminarRegistroPorId(idRegistro)
+        val response = regAlimentoService.eliminarRegistroPorId(idRegistro)
         if (!response.isSuccessful) throw Exception("No se pudo eliminar el registro")
     }
 
+    suspend fun obtenerUnidadesPorId(idAlimento: Long): List<String> {
+        val response = regAlimentoService.obtenerUnidadesPorId(idAlimento)
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Error al obtener unidades por ID: ${response.code()} ${response.message()}")
+        }
+    }
+
+    suspend fun obtenerUnidadesPorNombre(nombreAlimento: String): List<String> {
+        val response = regAlimentoService.obtenerUnidadesPorNombre(nombreAlimento)
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Error al obtener unidades por nombre: ${response.code()} ${response.message()}")
+        }
+    }
 }

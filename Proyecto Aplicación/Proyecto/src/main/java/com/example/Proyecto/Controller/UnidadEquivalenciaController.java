@@ -1,5 +1,6 @@
 package com.example.Proyecto.Controller;
 
+import com.example.Proyecto.DTO.UnidadEquivalenciaDTO;
 import com.example.Proyecto.Model.UnidadEquivalencia;
 import com.example.Proyecto.Service.UnidadEquivalenciaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,5 +71,11 @@ public class UnidadEquivalenciaController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // 400 Bad Request
         }
+    }
+
+    @PostMapping("/actualizar")
+    public ResponseEntity<UnidadEquivalencia> actualizarEquivalencia(@RequestBody UnidadEquivalenciaDTO dto) {
+        UnidadEquivalencia actualizada = unidadEquivalenciaService.crearOActualizarEquivalencia(dto);
+        return ResponseEntity.ok(actualizada);
     }
 }

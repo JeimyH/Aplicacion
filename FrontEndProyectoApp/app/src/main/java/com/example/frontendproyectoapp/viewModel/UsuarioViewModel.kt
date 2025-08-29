@@ -1,18 +1,28 @@
 package com.example.frontendproyectoapp.viewModel
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.frontendproyectoapp.interfaces.RetrofitClientAlimento
+import com.example.frontendproyectoapp.DataStores.ReminderDataStore
+import com.example.frontendproyectoapp.interfaces.AlimentoService
+import com.example.frontendproyectoapp.interfaces.RetrofitClient
 import com.example.frontendproyectoapp.model.Alimento
-import com.example.frontendproyectoapp.model.UserPreferences
+import com.example.frontendproyectoapp.DataStores.UserPreferences
+import com.example.frontendproyectoapp.model.ReminderState
 import com.example.frontendproyectoapp.model.Usuario
 import com.example.frontendproyectoapp.model.UsuarioEntrada
+import com.example.frontendproyectoapp.model.UsuarioRespuesta
+import com.example.frontendproyectoapp.notificaciones.AlarmHelper
 import com.example.frontendproyectoapp.repository.UsuarioRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -25,12 +35,13 @@ import java.util.Locale
 class UsuarioViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val repositoryUsuario = UsuarioRepository()
+    private val alimentoService = RetrofitClient.createService(AlimentoService::class.java)
 
-    // 🔸 Mapa para llevar el conteo por categoría
+    // Mapa para llevar el conteo por categoría
     private val _favoritosPorCategoria = mutableStateMapOf<String, MutableList<Alimento>>()
     val favoritosPorCategoria = mutableStateMapOf<String, List<Alimento>>()
 
-    // 🔸 Límite máximo por categoría
+    // Límite máximo por categoría
     private val LIMITE_POR_CATEGORIA = 3
 
     // LiveData
@@ -48,6 +59,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     var sexo by mutableStateOf("")
     var restriccionesDieta by mutableStateOf("")
     var objetivosSalud by mutableStateOf("")
+    var nivelActividad by mutableStateOf("")
     var pesoObjetivo by mutableStateOf(0f)
 
     // Regex de validación
@@ -68,6 +80,92 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     //Variable para guardar temporalmente los alimentos hasta que se registre un usuario y se puedan guardar los alimentos
     val alimentosFavoritos = mutableStateListOf<Alimento>()
 
+    private val _reminders = mutableStateMapOf<String, ReminderState>()
+    val reminders: Map<String, ReminderState> get() = _reminders
+
+    private val _eliminacionState = MutableStateFlow<Result<Unit>?>(null)
+    val eliminacionState: StateFlow<Result<Unit>?> = _eliminacionState.asStateFlow()
+
+    var nombreUsuario by mutableStateOf("Usuario")
+        private set
+    var correoUsuario by mutableStateOf("CorreoUsuario")
+    var fechaNacimientoUsuario by mutableStateOf("FechaNacimientoUsuario")
+        private set
+    var alturaUsuario by mutableStateOf("AlturaUsuario")
+    var pesoUsuario by mutableStateOf("PesoUsuario")
+    var sexoUsuario by mutableStateOf("SexoUsuario")
+        private set
+    var restriccionesDietaUsuario by mutableStateOf("RestriccionesDietaUsuario")
+    var objetivosSaludUsuario by mutableStateOf("ObjetivosSaludUsuario")
+    var nivelActividadUsuario by mutableStateOf("NivelActividadUsuario")
+    var pesoObjetivoUsuario by mutableStateOf("PesoObjetivoUsuario")
+
+    // Estado para controlar si el campo de altura está en modo de edición
+    var isEditingAltura by mutableStateOf(false)
+    // Variable para el nuevo valor de la altura
+    var nuevaAltura by mutableStateOf("")
+
+    var isEditingPeso by mutableStateOf(false)
+    var nuevoPeso by mutableStateOf("")
+    var isEditingPesoObjetivo by mutableStateOf(false)
+    var nuevoPesoObjetivo by mutableStateOf("")
+    var isEditingDieta by mutableStateOf(false)
+    var nuevoDieta by mutableStateOf("")
+    var isEditingObjetivo by mutableStateOf(false)
+    var nuevoObjetivo by mutableStateOf("")
+    var isEditingCorreo by mutableStateOf(false)
+    var nuevoCorreo by mutableStateOf("")
+    var isEditingNivelAct by mutableStateOf(false)
+    var nuevoNivelAct by mutableStateOf("")
+
+    val _actualizacionAlturaState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionAlturaState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionAlturaState.asStateFlow()
+    val _actualizacionPesoState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionPesoState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionPesoState.asStateFlow()
+    val _actualizacionPesoObjetivoState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionPesoObjetivoState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionPesoObjetivoState.asStateFlow()
+    val _actualizacionCorreoState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionCorreoState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionCorreoState.asStateFlow()
+    val _actualizacionDietaState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionDietaState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionDietaState.asStateFlow()
+    val _actualizacionObjetivoState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionObjetivoState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionObjetivoState.asStateFlow()
+    val _actualizacionNivelActState = MutableStateFlow<Result<UsuarioRespuesta>?>(null)
+    val actualizacionNivelActState: StateFlow<Result<UsuarioRespuesta>?> = _actualizacionNivelActState.asStateFlow()
+
+
+    // Estado para manejar el mensaje de éxito o error de la actualización
+    var mensajeActualizacionInformacion by mutableStateOf<String?>(null)
+    var mensajeActualizacionObjetivos by mutableStateOf<String?>(null)
+    var mensajeActualizacionCuenta by mutableStateOf<String?>(null)
+
+    fun cargarUsuario(idUsuario: Long) {
+        viewModelScope.launch {
+            val usuario = repositoryUsuario.obtenerUsuarioPorId(idUsuario)
+            if (usuario != null && !usuario.nombre.isNullOrEmpty()) {
+                nombreUsuario = usuario.nombre
+                correoUsuario = usuario.correo
+                fechaNacimientoUsuario = usuario.fechaNacimiento
+                alturaUsuario = usuario.altura.toString()
+                pesoUsuario = usuario.peso.toString()
+                sexoUsuario = usuario.sexo.toString()
+                restriccionesDietaUsuario = usuario.restriccionesDieta.toString()
+                objetivosSaludUsuario = usuario.objetivosSalud.toString()
+                nivelActividadUsuario = usuario.nivelActividad.toString()
+                pesoObjetivoUsuario = usuario.pesoObjetivo.toString()
+            }
+        }
+    }
+
+    fun cargarNombreUsuario(idUsuario: Long) {
+        viewModelScope.launch {
+            val usuario = repositoryUsuario.obtenerUsuarioPorId(idUsuario)
+            if (usuario != null && !usuario.nombre.isNullOrEmpty()) {
+                nombreUsuario = usuario.nombre
+            }
+        }
+    }
+
     fun validateNombre(nombre: String): String? {
         return if (nombre.isBlank()) "El nombre no puede estar vacío" else null
     }
@@ -84,14 +182,6 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
     fun validateConfirmPassword(password: String, confirmPassword: String): String? {
         return if (password == confirmPassword) null
         else "Las contraseñas no coinciden"
-    }
-
-    fun toggleFavorito(alimento: Alimento) {
-        if (alimentosFavoritos.any { it.idAlimento == alimento.idAlimento }) {
-            alimentosFavoritos.removeIf { it.idAlimento == alimento.idAlimento }
-        } else {
-            alimentosFavoritos.add(alimento)
-        }
     }
 
     fun calcularRangoPesoNormal(alturaCm: Float): Pair<Int, Int> {
@@ -118,7 +208,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun calcularEdadReg6(fechaNacimiento: String): Int {
+    fun calcularEdadReg7(fechaNacimiento: String): Int {
         return try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             val fecha = LocalDate.parse(fechaNacimiento, formatter)
@@ -174,6 +264,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                 sexo = sexo,
                 restriccionesDieta = restriccionesDieta,
                 objetivosSalud = objetivosSalud,
+                nivelActividad = nivelActividad,
                 pesoObjetivo = pesoObjetivo
             )
 
@@ -184,7 +275,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                     registroExitoso = true
                     UserPreferences.guardarIdUsuario(context, usuarioRespuesta.idUsuario)
 
-                    // 🔹 Consolidar favoritos por categoría antes de guardar
+                    // Consolidar favoritos por categoría antes de guardar
                     consolidarFavoritosPorCategoria()
 
                     try {
@@ -192,7 +283,7 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
                             alimentosFavoritos.map { alimento ->
                                 launch {
                                     try {
-                                        RetrofitClientAlimento.alimentoService.marcarFavorito(
+                                        alimentoService.marcarFavorito(
                                             usuarioRespuesta.idUsuario,
                                             alimento.idAlimento
                                         )
@@ -238,6 +329,165 @@ class UsuarioViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun eliminarCuenta(idUsuario: Long) {
+        viewModelScope.launch {
+            try {
+                // 1. Eliminar en backend
+                val result = repositoryUsuario.eliminarCuenta(idUsuario)
 
+                result.fold(
+                    onSuccess = {
+                        // 2. Limpiar DataStore
+                        UserPreferences.limpiarDatos(context)
+                        // 3. Actualizar el estado
+                        _eliminacionState.value = Result.success(Unit)
+                    },
+                    onFailure = { throwable ->
+                        _eliminacionState.value = Result.failure(throwable)
+                    }
+                )
+            } catch (e: Exception) {
+                _eliminacionState.value = Result.failure(e)
+            }
+        }
+    }
+
+    // Metodos para actualizar datos en la pestaña perfil
+    // Metodo para actualizar la altura
+    fun actualizarAltura(idUsuario: Long, altura: Float) {
+        viewModelScope.launch {
+            _actualizacionAlturaState.value = repositoryUsuario.actualizarAltura(idUsuario, altura)
+        }
+    }
+
+    // Métodos para cambiar el estado de la edición
+    fun toggleEditingAltura() {
+        isEditingAltura = !isEditingAltura
+    }
+
+    fun actualizarPeso(idUsuario: Long, peso: Float) {
+        viewModelScope.launch {
+            _actualizacionPesoState.value = repositoryUsuario.actualizarPeso(idUsuario, peso)
+        }
+    }
+
+    fun toggleEditingPeso() {
+        isEditingPeso = !isEditingPeso
+    }
+
+    fun actualizarPesoObjetivo(idUsuario: Long, pesoObjetivo: Float) {
+        viewModelScope.launch {
+            _actualizacionPesoObjetivoState.value = repositoryUsuario.actualizarPesoObjetivo(idUsuario, pesoObjetivo)
+        }
+    }
+
+    fun toggleEditingPesoObjetivo() {
+        isEditingPesoObjetivo = !isEditingPesoObjetivo
+    }
+
+    fun actualizarCorreo(idUsuario: Long, correo: String) {
+        viewModelScope.launch {
+            val error = validateEmail(correo)
+
+            if (error == null) {
+                // El correo es válido, procede con la actualización
+                _actualizacionCorreoState.value = repositoryUsuario.actualizarCorreo(idUsuario, correo)
+            } else {
+                // El correo no es válido, establece un mensaje de error y un estado de fallo
+                _actualizacionCorreoState.value = Result.failure(IllegalArgumentException(error))
+            }
+        }
+    }
+
+    fun toggleEditingCorreo() {
+        isEditingCorreo = !isEditingCorreo
+    }
+
+    fun actualizarDieta(idUsuario: Long, dieta: String) {
+        viewModelScope.launch {
+            _actualizacionDietaState.value = repositoryUsuario.actualizarDieta(idUsuario, dieta)
+        }
+    }
+
+    fun toggleEditingDieta() {
+        isEditingDieta = !isEditingDieta
+    }
+
+    fun actualizarObjetivo(idUsuario: Long, objetivo: String) {
+        viewModelScope.launch {
+            _actualizacionObjetivoState.value = repositoryUsuario.actualizarObjetivo(idUsuario, objetivo)
+        }
+    }
+
+    fun toggleEditingObjetivo() {
+        isEditingObjetivo = !isEditingObjetivo
+    }
+
+    fun actualizarNivelAct(idUsuario: Long, nivelAct: String) {
+        viewModelScope.launch {
+            _actualizacionNivelActState.value = repositoryUsuario.actualizarNivelAct(idUsuario, nivelAct)
+        }
+    }
+
+    fun toggleEditingNivelAct() {
+        isEditingNivelAct = !isEditingNivelAct
+    }
+
+    fun clearActualizacionState() {
+        _actualizacionAlturaState.value = null
+        _actualizacionPesoState.value = null
+        _actualizacionPesoObjetivoState.value = null
+        _actualizacionCorreoState.value = null
+        _actualizacionDietaState.value = null
+        _actualizacionObjetivoState.value = null
+        _actualizacionNivelActState.value = null
+    }
+
+    // Metodos para manejar los recordatorios
+    fun loadReminder(context: Context, userId: Long, tipo: String) {
+        viewModelScope.launch {
+            val (activo, hora) = ReminderDataStore.getReminderFlow(context, userId, tipo).first()
+            _reminders[tipo] = ReminderState(activo, hora)
+            Log.d("RecordatorioDebug", "📥 Cargado de DataStore -> userId=$userId, tipo=$tipo, activo=$activo, hora=$hora")
+        }
+    }
+
+    fun updateReminder(
+        context: Context,
+        userId: Long,
+        tipo: String,
+        activo: Boolean? = null,
+        hora: String? = null
+    ) {
+        val previo = _reminders[tipo] ?: ReminderState()
+        val nuevoActivo = activo ?: previo.activo
+        val nuevaHora = hora ?: previo.hora
+
+        _reminders[tipo] = ReminderState(nuevoActivo, nuevaHora)
+        Log.d("RecordatorioDebug", "🔄 updateReminder -> userId=$userId, tipo=$tipo, activo=$nuevoActivo, hora=$nuevaHora")
+
+        viewModelScope.launch {
+            ReminderDataStore.saveReminder(context, userId, tipo, nuevoActivo, nuevaHora)
+            Log.d("RecordatorioDebug", "💾 Guardado desde updateReminder -> userId=$userId, tipo=$tipo, activo=$nuevoActivo, hora=$nuevaHora")
+
+            val (h, m) = parseHora24(nuevaHora)
+            if (nuevoActivo) {
+                Log.d("RecordatorioDebug", "⏰ Programando alarma -> $tipo a las $h:$m (24h)")
+                AlarmHelper.scheduleDailyReminder(context, userId, tipo, h, m)
+            } else {
+                Log.d("RecordatorioDebug", "❌ Cancelando alarma -> $tipo")
+                AlarmHelper.cancelReminder(context, userId, tipo)
+            }
+        }
+    }
+
+    private fun parseHora24(hora: String): Pair<Int, Int> {
+        val parts = hora.split("[: ]".toRegex())
+        var h = parts[0].toInt()
+        val m = parts[1].toInt()
+        val amPm = if (parts.size == 3) parts[2] else ""
+        if (amPm == "PM" && h < 12) h += 12
+        if (amPm == "AM" && h == 12) h = 0
+        return h to m
+    }
 }
-

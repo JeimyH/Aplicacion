@@ -1,9 +1,13 @@
 package com.example.Proyecto.Service;
 
+import com.example.Proyecto.DTO.UnidadEquivalenciaDTO;
+import com.example.Proyecto.Model.Alimento;
 import com.example.Proyecto.Model.UnidadEquivalencia;
+import com.example.Proyecto.Repository.AlimentoRepository;
 import com.example.Proyecto.Repository.UnidadEquivalenciaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -13,6 +17,9 @@ import java.util.Optional;
 public class UnidadEquivalenciaService {
     @Autowired
     public UnidadEquivalenciaRepository unidadEquivalenciaRepository;
+
+    @Autowired
+    public AlimentoRepository alimentoRepository;
 
     public List<UnidadEquivalencia> listarUnidadEquivalencia(){
         // Validacion para intentar obtener la lista de las equivalencias de las unidades
@@ -87,5 +94,26 @@ public class UnidadEquivalenciaService {
         }else{
             return null;
         }
+    }
+
+    @Transactional
+    public UnidadEquivalencia crearOActualizarEquivalencia(UnidadEquivalenciaDTO dto) {
+        Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
+                .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
+
+        String origen = dto.getUnidadOrigen().toLowerCase();
+        String destino = dto.getUnidadDestino().toLowerCase();
+
+        Optional<UnidadEquivalencia> existente = unidadEquivalenciaRepository
+                .findByAlimentoAndUnidadOrigenAndUnidadDestino(alimento, origen, destino);
+
+        UnidadEquivalencia equivalencia = existente.orElseGet(UnidadEquivalencia::new);
+
+        equivalencia.setAlimento(alimento);
+        equivalencia.setUnidadOrigen(origen);
+        equivalencia.setUnidadDestino(destino);
+        equivalencia.setFactorConversion(dto.getFactorConversion());
+
+        return unidadEquivalenciaRepository.save(equivalencia);
     }
 }

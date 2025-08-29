@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.frontendproyectoapp.ui.theme.FrontEndProyectoAppTheme
@@ -67,12 +69,16 @@ fun RegistroVent4ScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
     ) {
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         // Barra de progreso superior 3/6
         LinearProgressIndicator(
-            progress = 3 / 6f,
+            progress = 3 / 7f,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(6.dp),
+                .height(6.dp)
+                .clip(RoundedCornerShape(4.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -101,16 +107,18 @@ fun RegistroVent4ScreenContent(
 
                 Text(
                     text = "Establece tu peso objetivo",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Según tu altura, tu peso saludable está entre ${pesoMin.toInt()} kg y ${pesoMax.toInt()} kg",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
@@ -170,8 +178,9 @@ fun RegistroVent4ScreenContent(
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Continuar", style = MaterialTheme.typography.labelLarge)
+            Text("Continuar", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
